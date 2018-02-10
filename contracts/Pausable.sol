@@ -10,12 +10,18 @@ contract Pausable is OwnedI, PausableI {
 	function Pausable(bool _paused){
 		paused = _paused;
 	}
-
+	
+	/**
+	 * @dev Modifier to make a function callable only when the contract is not paused.
+	 */
 	modifier whenNotPaused() { 
 		require(!isPaused()); 
 		_;
 	}
 
+	/**
+	 * @dev Modifier to make a function callable only when the contract is paused.
+	 */
 	modifier whenPaused() {
 		require(!isPaused());
 		_;
