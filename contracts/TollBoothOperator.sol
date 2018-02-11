@@ -1,6 +1,6 @@
 pragma solidity ^0.4.13;
 
-//import './interfaces/OwnedI.sol';
+import './Owned.sol';
 import './Pausable.sol';
 import './Regulated.sol';
 import './MultiplierHolder.sol';
@@ -9,25 +9,22 @@ import './TollBoothHolder.sol';
 import './RoutePriceHolder.sol';
 import './interfaces/TollBoothOperatorI.sol';
 
-contract TollBoothOperator is Pausable, MultiplierHolder, DepositHolder, TollBoothHolder,
-	RoutePriceHolder, TollBoothOperatorI {
+//contract TollBoothOperator is Pausable, MultiplierHolder, DepositHolder, TollBoothHolder,
+//	RoutePriceHolder, TollBoothOperatorI {
+contract TollBoothOperator is TollBoothOperatorI {
 	    
 	bool public paused;
 	uint public deposit;
 	address public regulator;
 	
 	function TollBoothOperator(bool _paused, uint _deposit, address _regulator)
+	    
 	{
-		require(deposit != 0);
-		require(regulator != 0x0);
+		//require(deposit != 0);
+		//require(regulator != 0x0);
 		paused = _paused;
 		deposit = _deposit;
 		regulator = _regulator;
-	}
-	
-	function() 
-	{ 
-	    revert(); 
 	}
 	
 	/**
@@ -215,23 +212,5 @@ contract TollBoothOperator is Pausable, MultiplierHolder, DepositHolder, TollBoo
     {
         return true;
     }
-    /**
-     * This function overrides the eponymous function of `RoutePriceHolderI`, to which it adds the following
-     * functionality:
-     *     - If relevant, it will release 1 pending payment for this route. As part of this payment
-     *       release, it will emit the appropriate `LogRoadExited` event.
-     *     - In the case where the next relevant pending payment is not solvable, which can happen if,
-     *       for instance the vehicle has had wrongly set values in the interim:
-     *       - It should release 0 pending payment
-     *       - It should not roll back the transaction
-     *       - It should behave as if there had been no pending payment, apart from the higher gas consumed.
-     *     - It should be possible to call it even when the contract is in the `true` paused state.
-     * Emits LogRoadExited if applicable.
-    function setRoutePrice(
-            address entryBooth,
-            address exitBooth,
-            uint priceWeis)
-        public
-        returns(bool success);
-     */
+   
 }

@@ -6,6 +6,9 @@ import './TollBoothOperator.sol';
 
 contract Regulator is Owned, RegulatorI {
     
+    
+    mapping (address => TollBoothOperator ) public mTollBoothOperators;
+    
 	function Regulator()
 	{
 	}
@@ -45,7 +48,7 @@ contract Regulator is Owned, RegulatorI {
         public
         returns(bool success)
     {
-        require(msg.sender != Owned.owner);
+        require(msg.sender == Owned.owner);
         // @todo lookup vehicle exists
         require(vehicle != 0x0);
         // @todo set the vehicle
@@ -94,11 +97,12 @@ contract Regulator is Owned, RegulatorI {
         public
         returns(TollBoothOperatorI newOperator)
     {
-        require(msg.sender != Owned.owner);
+        require(msg.sender == Owned.owner);
         //TollBoothOperator(true, deposit, owner);
-        //address newOperators = new TollBoothOperator(true,deposit,owner);
-        //LogTollBoothOperatorCreated(msg.sender,newOperator,owner,deposit);
-        return newOperator;
+        TollBoothOperator c = new TollBoothOperator(true,deposit,owner);
+        LogTollBoothOperatorCreated(msg.sender,owner,owner,deposit);
+        mTollBoothOperators[owner] = c;
+        return c;
     }
     /**
      * Event emitted when a TollBoothOperator has been removed from the list of approved operators.
@@ -121,6 +125,10 @@ contract Regulator is Owned, RegulatorI {
         public
         returns(bool success)
     {
+        require(msg.sender == Owned.owner);
+        require(isOperator(operator));
+        delete mTollBoothOperators[operator];
+        LogTollBoothOperatorRemoved(msg.sender,operator);
         return true;
     }
     /**
@@ -132,6 +140,9 @@ contract Regulator is Owned, RegulatorI {
         public
         returns(bool indeed)
     {
+        require(operator != 0x0);
+        //require(tollBoothOperators[operator] != bytes4(0x0) );
+        //@todo check operator
         return true;
     }
     
