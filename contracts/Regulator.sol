@@ -6,8 +6,18 @@ import './TollBoothOperator.sol';
 
 contract Regulator is Owned, RegulatorI {
     
+    struct Vehicle {
+        uint vType;
+        bool exists;
+    }
     
-    mapping (address => TollBoothOperator ) public mTollBoothOperators;
+    struct tollBoothOperatorStruct {
+        bool isApproved;
+        address tollBoothOperatorAddress;
+   }
+    
+    mapping (address => tollBoothOperatorStruct ) public mTollBoothOperators;
+    mapping (address => Vehicle) public mVehicle;
     
 	function Regulator()
 	{
@@ -22,6 +32,7 @@ contract Regulator is Owned, RegulatorI {
      *   2: car
      *   3: lorry
      */
+     
     /**
      * Event emitted when a new vehicle has been registered with its type.
      * @param sender The account that ran the action.
@@ -32,6 +43,7 @@ contract Regulator is Owned, RegulatorI {
         address indexed sender,
         address indexed vehicle,
         uint indexed vehicleType);
+        
     /**
      * Called by the owner of the regulator to register a new vehicle with its VehicleType.
      *     It should roll back if the caller is not the owner of the contract.
@@ -45,13 +57,18 @@ contract Regulator is Owned, RegulatorI {
      * Emits LogVehicleTypeSet
      */
     function setVehicleType(address vehicle, uint vehicleType)
+        fromOwner()
         public
         returns(bool success)
     {
-        require(msg.sender == Owned.owner);
-        // @todo lookup vehicle exists
         require(vehicle != 0x0);
-        // @todo set the vehicle
+        require(mVehicle[vehicle].vType != vehicleType);
+        if(vehicleType == 0){
+            delete mVehicle[vehicle];
+        }else{
+            mVehicle[vehicle].vType = vehicleType;
+            mVehicle[vehicle].exists = true;
+        }
         LogVehicleTypeSet(msg.sender, vehicle, vehicleType);
         return true;
     }
@@ -66,9 +83,9 @@ contract Regulator is Owned, RegulatorI {
         public
         returns(uint vehicleType)
     {
-        // @todo lookup vehicle
-        return 0;
+        return mVehicle[vehicle].vType;
     }
+    
     /**
      * Event emitted when a new TollBoothOperator has been created and registered.
      * @param sender The account that ran the action.
@@ -81,6 +98,7 @@ contract Regulator is Owned, RegulatorI {
         address indexed newOperator,
         address indexed owner,
         uint depositWeis);
+        
     /**
      * Called by the owner of the regulator to deploy a new TollBoothOperator onto the network.
      *     It should roll back if the caller is not the owner of the contract.
@@ -94,16 +112,18 @@ contract Regulator is Owned, RegulatorI {
     function createNewOperator(
             address owner,
             uint deposit)
+        fromOwner()
         public
         returns(TollBoothOperatorI newOperator)
     {
-        require(msg.sender == Owned.owner);
-        //TollBoothOperator(true, deposit, owner);
-        TollBoothOperator c = new TollBoothOperator(true,deposit,owner);
-        LogTollBoothOperatorCreated(msg.sender,owner,owner,deposit);
-        mTollBoothOperators[owner] = c;
-        return c;
+        require(getOwner() != owner);
+        TollBoothOperator nOperator = new TollBoothOperator(true,deposit,owner);
+        LogTollBoothOperatorCreated(msg.sender,owner,getOwner(),deposit);
+        mTollBoothOperators[owner].isApproved = true;
+        mTollBoothOperators[owner].tollBoothOperatorAddress = owner;
+        return nOperator;
     }
+    
     /**
      * Event emitted when a TollBoothOperator has been removed from the list of approved operators.
      * @param sender The account that ran the action.
@@ -122,15 +142,16 @@ contract Regulator is Owned, RegulatorI {
      * Emits LogTollBoothOperatorRemoved.
      */
     function removeOperator(address operator)
+        fromOwner()
         public
         returns(bool success)
     {
-        require(msg.sender == Owned.owner);
         require(isOperator(operator));
         delete mTollBoothOperators[operator];
         LogTollBoothOperatorRemoved(msg.sender,operator);
         return true;
     }
+    
     /**
      * @param operator The address of the TollBoothOperator to test.
      * @return Whether the TollBoothOperator is indeed approved.
@@ -141,9 +162,8 @@ contract Regulator is Owned, RegulatorI {
         returns(bool indeed)
     {
         require(operator != 0x0);
-        //require(tollBoothOperators[operator] != bytes4(0x0) );
-        //@todo check operator
-        return true;
+        return mTollBoothOperators[operator].isApproved;
+        //return mTollBoothOperators[operator].tollBoothOperatorAddress;
     }
     
 }
