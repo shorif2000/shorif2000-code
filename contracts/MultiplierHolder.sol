@@ -5,7 +5,10 @@ import './interfaces/MultiplierHolderI.sol';
 
 contract MultiplierHolder is Owned, MultiplierHolderI {
     
-    uint private multiplier;
+    struct multiplierStruct {
+        uint multiplier;
+    }
+    mapping(uint => multiplierStruct) public mMultiplier;
     
     //mapping (uint => multiplier) public multipliers; 
     
@@ -22,6 +25,7 @@ contract MultiplierHolder is Owned, MultiplierHolderI {
         address indexed sender,
         uint indexed vehicleType,
         uint multiplier);
+        
     /**
      * Called by the owner of the TollBoothOperator.
      *   Can be used to update a value.
@@ -36,14 +40,21 @@ contract MultiplierHolder is Owned, MultiplierHolderI {
     function setMultiplier(
             uint vehicleType,
             uint multiplier)
+        fromOwner
         public
         returns(bool success)
     {
         require(vehicleType != 0);
-        //multiplier = _multiplier;
+        require(mMultiplier[vehicleType].multiplier != multiplier);
+        if(multiplier == 0){
+            delete mMultiplier[vehicleType];
+        }else{
+            mMultiplier[vehicleType].multiplier = multiplier;
+        }
         LogMultiplierSet(msg.sender,vehicleType,multiplier);
         return true;
     }
+    
     /**
      * @param vehicleType The type of vehicle whose multiplier we want
      *     It should accept a vehicle type equal to 0.
@@ -55,7 +66,6 @@ contract MultiplierHolder is Owned, MultiplierHolderI {
         public
         returns(uint multiplier)
     {
-        require(vehicleType >= 0);
-        return 0;
+        return mMultiplier[vehicleType].multiplier;
     }
 }
