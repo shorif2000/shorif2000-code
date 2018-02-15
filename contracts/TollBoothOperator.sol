@@ -71,6 +71,8 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         returns (bool success)
     {
         require(isTollBooth(entryBooth));
+        //require(Regulator.mVehicle[msg.sender].vType > 0);
+        LogRoadEntered(msg.sender,entryBooth, exitSecretHashed,DepositHolder.getDeposit());
         return true;
     }
     
