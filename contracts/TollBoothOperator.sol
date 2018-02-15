@@ -8,21 +8,15 @@ import './TollBoothHolder.sol';
 import './RoutePriceHolder.sol';
 import './interfaces/TollBoothOperatorI.sol';
 
-contract TollBoothOperator is Pausable(true), MultiplierHolder, DepositHolder(1), TollBoothHolder,
-	RoutePriceHolder, TollBoothOperatorI {
+contract TollBoothOperator is MultiplierHolder, TollBoothHolder, RoutePriceHolder, TollBoothOperatorI {
 //contract TollBoothOperator is Pausable(true), TollBoothOperatorI {
 	    
-	bool public paused;
-	uint public deposit;
-	address public regulator;
-	
-	function TollBoothOperator(bool _paused, uint _deposit, address _regulator)
+	function TollBoothOperator(bool initPaused, uint initDeposit, address initRegulator)
+	    public 
 	{
-		require(_deposit != 0);
-		require(_regulator != 0x0);
-		paused = _paused;
-		deposit = _deposit;
-		regulator = _regulator;
+	    Pausable(initPaused);
+	    DepositHolder(initDeposit);
+	    Regulated(initRegulator);
 	}
 	
 	/**
@@ -141,7 +135,7 @@ contract TollBoothOperator is Pausable(true), MultiplierHolder, DepositHolder(1)
      *   2: pending oracle -> emits LogPendingPayment
      */
     function reportExitRoad(bytes32 exitSecretClear)
-        whenNotPaused
+        //Pausable.whenNotPaused
         public
         returns (uint status)
     {
@@ -179,7 +173,7 @@ contract TollBoothOperator is Pausable(true), MultiplierHolder, DepositHolder(1)
             address entryBooth,
             address exitBooth,
             uint count)
-        whenNotPaused
+        //whenNotPaused
         public
         returns (bool success)
     {
@@ -198,7 +192,7 @@ contract TollBoothOperator is Pausable(true), MultiplierHolder, DepositHolder(1)
         public
         returns(uint amount)
     {
-        return getDeposit();
+        return DepositHolder.getDeposit();
     }
     /**
      * Event emitted when the owner collects the fees.
@@ -222,9 +216,9 @@ contract TollBoothOperator is Pausable(true), MultiplierHolder, DepositHolder(1)
         public
         returns(bool success)
     {
-        require(getDeposit() != 0);
+        require(DepositHolder.getDeposit() != 0);
         //@todo how to withdraw
-        LogFeesCollected(getOwner(),getDeposit());
+        LogFeesCollected(getOwner(),DepositHolder.getDeposit());
         return true;
     }
    
