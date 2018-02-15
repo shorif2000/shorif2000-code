@@ -9,11 +9,11 @@ import './interfaces/TollBoothOperatorI.sol';
 
 contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePriceHolder, Regulated, TollBoothOperatorI {
 	    
-	function TollBoothOperator(bool initPaused, uint initDeposit, address initRegulator)
+	function TollBoothOperator(bool paused, uint deposit, address regulator)
 	    public 
-	    Pausable(initPaused)
-	    DepositHolder(initDeposit)
-	    Regulated(initRegulator)
+	    Pausable(paused)
+	    DepositHolder(deposit)
+	    Regulated(regulator)
 	{
 	    
 	}
