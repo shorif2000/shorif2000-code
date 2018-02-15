@@ -5,9 +5,11 @@ import './interfaces/DepositHolderI.sol';
 
 contract DepositHolder is Owned, DepositHolderI {
     
-	function DepositHolder(uint deposit)
+    uint private deposit;
+    
+	function DepositHolder(uint _deposit)
 	{
-		require(deposit != 0);
+		require(_deposit != 0);
 	}
 	
 	/**
@@ -16,6 +18,7 @@ contract DepositHolder is Owned, DepositHolderI {
      * @param depositWeis The value of the deposit measured in weis.
      */
     event LogDepositSet(address indexed sender, uint depositWeis);
+    
     /**
      * Called by the owner of the DepositHolder.
      *     It should roll back if the caller is not the owner of the contract.
@@ -26,12 +29,13 @@ contract DepositHolder is Owned, DepositHolderI {
      * Emits LogDepositSet.
      */
     function setDeposit(uint depositWeis)
+        fromOwner
         public
         returns(bool success)
     {
-        require(msg.sender != Owned.owner);
         require(depositWeis != 0);
-        // not sure what this means
+        require(deposit != depositWeis);
+        deposit = depositWeis;
         LogDepositSet(msg.sender, depositWeis);
         return true;
     }
@@ -45,8 +49,6 @@ contract DepositHolder is Owned, DepositHolderI {
         public
         returns(uint weis)
     {
-        //need to 
-        
-        return 0;
+        return deposit;
     }
 }

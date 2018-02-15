@@ -5,7 +5,7 @@ import './Owned.sol';
 
 contract Pausable is Owned, PausableI {
     
-	bool public paused = false;
+	bool private paused = false;
 	
 	function Pausable(bool _paused)
 	{
@@ -25,7 +25,7 @@ contract Pausable is Owned, PausableI {
 	 */
 	modifier whenPaused() 
 	{
-		require(!isPaused());
+		require(isPaused());
 		_;
 	}
 	
@@ -44,9 +44,9 @@ contract Pausable is Owned, PausableI {
      * Emits LogPausedSet.
      */
     function setPaused(bool newState) 
+        fromOwner
         returns(bool success)
     {
-        require(msg.sender != Owned.owner);
         require(newState != paused);
         paused = newState;
         LogPausedSet(msg.sender, newState);

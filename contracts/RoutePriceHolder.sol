@@ -4,7 +4,14 @@ import './/Owned.sol';
 import './TollBoothHolder.sol';
 import './interfaces/RoutePriceHolderI.sol';
 
-contract RoutePriceHolder is Owned, TollBoothHolder, RoutePriceHolderI {
+contract RoutePriceHolder is TollBoothHolder, RoutePriceHolderI {
+    
+    struct routeStruct {
+        address entry;
+        address exit;
+        uint routecost;
+    }
+    
 	function RoutePriceHolder(){
 	}
 	
@@ -20,6 +27,7 @@ contract RoutePriceHolder is Owned, TollBoothHolder, RoutePriceHolderI {
         address indexed entryBooth,
         address indexed exitBooth,
         uint priceWeis);
+        
     /**
      * Called by the owner of the RoutePriceHolder.
      *     It can be used to update the price of a route, including to zero.
@@ -38,11 +46,20 @@ contract RoutePriceHolder is Owned, TollBoothHolder, RoutePriceHolderI {
             address entryBooth,
             address exitBooth,
             uint priceWeis)
+        fromOwner
         public
         returns(bool success)
     {
+        require(entryBooth != 0x0);
+        require(exitBooth != 0x0);
+        require(isTollBooth(entryBooth));
+        require(isTollBooth(exitBooth));
+        require(entryBooth != exitBooth);
+        // @todo set price
+        LogRoutePriceSet(msg.sender,entryBooth,exitBooth,priceWeis);
         return true;
     }
+    
     /**
      * @param entryBooth The address of the entry booth of the route.
      * @param exitBooth The address of the exit booth of the route.
@@ -57,6 +74,13 @@ contract RoutePriceHolder is Owned, TollBoothHolder, RoutePriceHolderI {
         public
         returns(uint priceWeis)
     {
+        require(entryBooth != 0x0);
+        require(exitBooth != 0x0);
+        require(isTollBooth(entryBooth));
+        require(isTollBooth(exitBooth));
+        require(entryBooth != exitBooth);
+        // @todo check route exists
+        
         return 0;
     }
 }

@@ -1,6 +1,5 @@
 pragma solidity ^0.4.13;
 
-import './Owned.sol';
 import './Pausable.sol';
 import './Regulated.sol';
 import './MultiplierHolder.sol';
@@ -9,19 +8,18 @@ import './TollBoothHolder.sol';
 import './RoutePriceHolder.sol';
 import './interfaces/TollBoothOperatorI.sol';
 
-//contract TollBoothOperator is Pausable, MultiplierHolder, DepositHolder, TollBoothHolder,
-//	RoutePriceHolder, TollBoothOperatorI {
-contract TollBoothOperator is TollBoothOperatorI {
+contract TollBoothOperator is Pausable(true), MultiplierHolder, DepositHolder(1), TollBoothHolder,
+	RoutePriceHolder, TollBoothOperatorI {
+//contract TollBoothOperator is Pausable(true), TollBoothOperatorI {
 	    
 	bool public paused;
 	uint public deposit;
 	address public regulator;
 	
 	function TollBoothOperator(bool _paused, uint _deposit, address _regulator)
-	    
 	{
-		//require(deposit != 0);
-		//require(regulator != 0x0);
+		require(_deposit != 0);
+		require(_regulator != 0x0);
 		paused = _paused;
 		deposit = _deposit;
 		regulator = _regulator;
@@ -41,6 +39,7 @@ contract TollBoothOperator is TollBoothOperatorI {
         // @todo match hash check
         return hashed;
     }
+    
     /**
      * Event emitted when a vehicle made the appropriate deposit to enter the road system.
      * @param vehicle The address of the vehicle that entered the road system.
@@ -53,6 +52,7 @@ contract TollBoothOperator is TollBoothOperatorI {
         address indexed entryBooth,
         bytes32 indexed exitSecretHashed,
         uint depositedWeis);
+        
     /**
      * Called by the vehicle entering a road system.
      * Off-chain, the entry toll booth will open its gate up successful deposit and confirmation
@@ -77,8 +77,10 @@ contract TollBoothOperator is TollBoothOperatorI {
         payable
         returns (bool success)
     {
+        require(isTollBooth(entryBooth));
         return true;
     }
+    
     /**
      * @param exitSecretHashed The hashed secret used by the vehicle when entering the road.
      * @return The information pertaining to the entry of the vehicle.
@@ -139,9 +141,11 @@ contract TollBoothOperator is TollBoothOperatorI {
      *   2: pending oracle -> emits LogPendingPayment
      */
     function reportExitRoad(bytes32 exitSecretClear)
+        whenNotPaused
         public
         returns (uint status)
     {
+        require(isTollBooth(msg.sender));
         return 0;
     }
     /**
@@ -155,6 +159,8 @@ contract TollBoothOperator is TollBoothOperatorI {
         public
         returns (uint count)
     {
+        require(isTollBooth(entryBooth));
+        require(isTollBooth(exitBooth));
         return 0;
     }
     /**
@@ -173,9 +179,13 @@ contract TollBoothOperator is TollBoothOperatorI {
             address entryBooth,
             address exitBooth,
             uint count)
+        whenNotPaused
         public
         returns (bool success)
     {
+        require(isTollBooth(entryBooth));
+        require(isTollBooth(exitBooth));
+        require(count != 0);
         return true;
     }
     /**
@@ -188,7 +198,7 @@ contract TollBoothOperator is TollBoothOperatorI {
         public
         returns(uint amount)
     {
-        return 0;
+        return getDeposit();
     }
     /**
      * Event emitted when the owner collects the fees.
@@ -198,6 +208,7 @@ contract TollBoothOperator is TollBoothOperatorI {
     event LogFeesCollected(
         address indexed owner,
         uint amount);
+        
     /**
      * Called by the owner of the contract to withdraw all collected fees (not deposits) to date.
      *     It should roll back if any other address is calling this function.
@@ -207,9 +218,13 @@ contract TollBoothOperator is TollBoothOperatorI {
      * Emits LogFeesCollected.
      */
     function withdrawCollectedFees()
+        fromOwner
         public
         returns(bool success)
     {
+        require(getDeposit() != 0);
+        //@todo how to withdraw
+        LogFeesCollected(getOwner(),getDeposit());
         return true;
     }
    

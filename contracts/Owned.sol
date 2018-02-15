@@ -4,7 +4,7 @@ import './interfaces/OwnedI.sol';
 
 contract Owned is OwnedI {
     
-	address public owner;
+	address private currentOwner;
 	
 	function Ownable() 
 	{
@@ -14,7 +14,7 @@ contract Owned is OwnedI {
 	 */
 	modifier fromOwner() 
 	{
-		require(msg.sender == owner);
+		require(msg.sender == currentOwner);
 		_;
 	}
 	
@@ -33,14 +33,15 @@ contract Owned is OwnedI {
      * @return Whether the action was successful.
      * Emits LogOwnerSet.
      */
-    function setOwner(address newOwner) 
+    function setOwner(address newOwner)
+        fromOwner
         returns(bool success)
     {
-        require(msg.sender != owner);
-        require(owner != newOwner);
+        address owner = getOwner();
+        require(getOwner() != newOwner);
         require(newOwner != 0x0);
-        owner = newOwner;
-        LogOwnerSet(msg.sender,newOwner);
+        currentOwner = newOwner;
+        LogOwnerSet(owner,newOwner);
         return true;
     }
     /**
@@ -50,6 +51,6 @@ contract Owned is OwnedI {
         constant 
         returns(address owner)
     {
-        return owner;
+        return currentOwner;
     }
 }

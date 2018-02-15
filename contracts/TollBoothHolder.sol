@@ -5,6 +5,12 @@ import './interfaces/TollBoothHolderI.sol';
 
 contract TollBoothHolder is Owned, TollBoothHolderI {
     
+    struct tollBoothStruct {
+        bool exists;
+    }
+    
+    mapping (address => tollBoothStruct) public mTollBooth;
+    
 	function TollBoothHolder(){
 	}
 	
@@ -16,6 +22,7 @@ contract TollBoothHolder is Owned, TollBoothHolderI {
     event LogTollBoothAdded(
         address indexed sender,
         address indexed tollBooth);
+        
     /**
      * Called by the owner of the TollBoothOperator.
      *     It should roll back if the caller is not the owner of the contract.
@@ -28,16 +35,17 @@ contract TollBoothHolder is Owned, TollBoothHolderI {
      * Emits LogTollBoothAdded
      */
     function addTollBooth(address tollBooth)
+        fromOwner
         public
         returns(bool success)
     {
-        require(msg.sender != Owned.owner);
         require(tollBooth != 0x0);
         require(!isTollBooth(tollBooth));
-        // @todo add tollBooth
+        mTollBooth[tollBooth].exists = true;
         LogTollBoothAdded(msg.sender,tollBooth);
         return true;
     }
+    
     /**
      * @param tollBooth The address of the toll booth we enquire about.
      * @return Whether the toll booth is indeed part of the operator.
@@ -47,9 +55,9 @@ contract TollBoothHolder is Owned, TollBoothHolderI {
         public
         returns(bool isIndeed)
     {
-        //@todo check tollBooth
-        return true;
+        return mTollBooth[tollBooth].exists;
     }
+    
     /**
      * Event emitted when a toll booth has been removed from the TollBoothOperator.
      * @param sender The account that ran the action.
@@ -58,6 +66,7 @@ contract TollBoothHolder is Owned, TollBoothHolderI {
     event LogTollBoothRemoved(
         address indexed sender,
         address indexed tollBooth);
+        
     /**
      * Called by the owner of the TollBoothOperator.
      *     It should roll back if the caller is not the owner of the contract.
@@ -70,13 +79,13 @@ contract TollBoothHolder is Owned, TollBoothHolderI {
      * Emits LogTollBoothRemoved
      */
     function removeTollBooth(address tollBooth)
+        fromOwner
         public
         returns(bool success)
     {
-        require(msg.sender != Owned.owner);
-        //@todo check in mapping if it exists
         require(tollBooth != 0x0);
-        //@todo remove the tollBooth
+        require(mTollBooth[tollBooth].exists);
+        delete mTollBooth[tollBooth];
         LogTollBoothRemoved(msg.sender,tollBooth);
         return true;
     }
