@@ -1,22 +1,21 @@
 pragma solidity ^0.4.13;
 
-import './Pausable.sol';
-import './Regulated.sol';
+import './Pausable.sol'; 
+import './DepositHolder.sol';    
 import './MultiplierHolder.sol';
-import './DepositHolder.sol';
-import './TollBoothHolder.sol';
-import './RoutePriceHolder.sol';
+import './RoutePriceHolder.sol';    
+import './Regulated.sol';  
 import './interfaces/TollBoothOperatorI.sol';
 
-contract TollBoothOperator is MultiplierHolder, TollBoothHolder, RoutePriceHolder, TollBoothOperatorI {
-//contract TollBoothOperator is Pausable(true), TollBoothOperatorI {
+contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePriceHolder, Regulated, TollBoothOperatorI {
 	    
 	function TollBoothOperator(bool initPaused, uint initDeposit, address initRegulator)
 	    public 
+	    Pausable(initPaused)
+	    DepositHolder(initDeposit)
+	    Regulated(initRegulator)
 	{
-	    Pausable(initPaused);
-	    DepositHolder(initDeposit);
-	    Regulated(initRegulator);
+	    
 	}
 	
 	/**
