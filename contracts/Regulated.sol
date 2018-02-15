@@ -1,7 +1,6 @@
 pragma solidity ^0.4.13;
 
 import './interfaces/RegulatedI.sol';
-import './Regulator.sol';
 
 contract Regulated is RegulatedI {
     
