@@ -40,7 +40,7 @@ contract MultiplierHolder is Owned, MultiplierHolderI {
     function setMultiplier(
             uint vehicleType,
             uint multiplier)
-        //fromOwner
+        fromOwner
         public
         returns(bool success)
     {
