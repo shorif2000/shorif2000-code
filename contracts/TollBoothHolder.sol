@@ -5,11 +5,7 @@ import './interfaces/TollBoothHolderI.sol';
 
 contract TollBoothHolder is Owned, TollBoothHolderI {
     
-    struct tollBoothStruct {
-        bool exists;
-    }
-    
-    mapping (address => tollBoothStruct) public mTollBooth;
+    mapping (address => bool) public mTollBooth;
     
 	function TollBoothHolder(){
 	}
@@ -41,7 +37,7 @@ contract TollBoothHolder is Owned, TollBoothHolderI {
     {
         require(tollBooth != 0x0);
         require(!isTollBooth(tollBooth));
-        mTollBooth[tollBooth].exists = true;
+        mTollBooth[tollBooth] = true;
         LogTollBoothAdded(msg.sender,tollBooth);
         return true;
     }
@@ -55,7 +51,7 @@ contract TollBoothHolder is Owned, TollBoothHolderI {
         public
         returns(bool isIndeed)
     {
-        return mTollBooth[tollBooth].exists;
+        return mTollBooth[tollBooth];
     }
     
     /**
@@ -84,7 +80,7 @@ contract TollBoothHolder is Owned, TollBoothHolderI {
         returns(bool success)
     {
         require(tollBooth != 0x0);
-        require(mTollBooth[tollBooth].exists);
+        require(mTollBooth[tollBooth]);
         delete mTollBooth[tollBooth];
         LogTollBoothRemoved(msg.sender,tollBooth);
         return true;
