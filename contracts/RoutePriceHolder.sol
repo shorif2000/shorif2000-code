@@ -6,6 +6,8 @@ import './interfaces/RoutePriceHolderI.sol';
 
 contract RoutePriceHolder is TollBoothHolder, RoutePriceHolderI {
     
+    mapping (address => mapping ( address => uint ) ) public mRoutePrice;
+    
 	function RoutePriceHolder(){
 	}
 	
@@ -49,7 +51,7 @@ contract RoutePriceHolder is TollBoothHolder, RoutePriceHolderI {
         require(isTollBooth(entryBooth));
         require(isTollBooth(exitBooth));
         require(entryBooth != exitBooth);
-        // @todo set price
+        mRoutePrice[entryBooth][exitBooth] = priceWeis;
         LogRoutePriceSet(msg.sender,entryBooth,exitBooth,priceWeis);
         return true;
     }
@@ -68,13 +70,13 @@ contract RoutePriceHolder is TollBoothHolder, RoutePriceHolderI {
         public
         returns(uint priceWeis)
     {
+        //@todo return 0 on failure
         require(entryBooth != 0x0);
         require(exitBooth != 0x0);
         require(isTollBooth(entryBooth));
         require(isTollBooth(exitBooth));
         require(entryBooth != exitBooth);
-        // @todo check route exists
         
-        return 0;
+        return mRoutePrice[entryBooth][exitBooth];
     }
 }
