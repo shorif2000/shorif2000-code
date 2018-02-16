@@ -9,7 +9,9 @@ import './interfaces/TollBoothOperatorI.sol';
 
 contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePriceHolder, Regulated, TollBoothOperatorI {
 	    
-	mapping (address => mapping (bytes32 => bool) ) public mUsedHash;
+	mapping( address => uint ) private mEnterRoadDeposit;
+	mapping( address => address ) private mEnterVehicleBooth;
+	mapping (bytes32 => address ) private mUsedHashVehicle;
 	
 	function TollBoothOperator(bool paused, uint deposit, address regulator)
 	    public 
@@ -76,8 +78,8 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         //@todo vehicle not allowed on road system
         require(isTollBooth(entryBooth));
         require(msg.value > (getDeposit() * getMultiplier(vType)));
-        require(mUsedHash[entryBooth][exitSecretHashed] == false );
-        mUsedHash[entryBooth][exitSecretHashed] = true;
+        require(mEnterRoadDeposit[mEnterVehicleBooth[mUsedHashVehicle[exitSecretHashed]]] > 0 );
+        mEnterRoadDeposit[mEnterVehicleBooth[mUsedHashVehicle[exitSecretHashed]]] = msg.value;
         LogRoadEntered(msg.sender,entryBooth, exitSecretHashed,DepositHolder.getDeposit());
         return true;
     }
@@ -99,8 +101,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             address entryBooth,
             uint depositedWeis)
     {
-        address x; address y;
-        return (x,y,0);
+        return (mUsedHashVehicle[exitSecretHashed],mEnterVehicleBooth[mUsedHashVehicle[exitSecretHashed]],mEnterRoadDeposit[mEnterVehicleBooth[mUsedHashVehicle[exitSecretHashed]]]);
     }
             
     /**
