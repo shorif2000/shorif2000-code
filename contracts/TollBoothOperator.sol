@@ -15,6 +15,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
 	    DepositHolder(deposit)
 	    Regulated(regulator)
 	{
+	    setOwner(regulator);
 	}
 	
 	/**
