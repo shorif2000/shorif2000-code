@@ -161,7 +161,6 @@ contract Regulator is Owned, RegulatorI {
         public
         returns(bool indeed)
     {
-        require(operator != 0x0);
         return mTollBoothOperators[operator].isApproved;
         //return mTollBoothOperators[operator].tollBoothOperatorAddress;
     }
