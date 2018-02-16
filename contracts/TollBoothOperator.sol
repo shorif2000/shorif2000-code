@@ -151,6 +151,17 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         returns (uint status)
     {
         require(isTollBooth(msg.sender));
+        address vehicle;
+        address entryBooth;
+        uint depositedWeis;
+        (vehicle, entryBooth, depositedWeis) = getVehicleEntry(exitSecretClear);
+        require(Regulated.getRegulator().getVehicleType(vehicle) > 0);
+        //@todo vehicle is no longer allowed on this road system.
+        require(msg.sender != entryBooth);
+        //@todo exithash
+        //@todo secret used
+        
+        //LogRoadExited(msg.sender,exitSecretClear);
         return 0;
     }
     /**
