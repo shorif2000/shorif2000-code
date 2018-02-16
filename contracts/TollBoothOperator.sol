@@ -9,6 +9,8 @@ import './interfaces/TollBoothOperatorI.sol';
 
 contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePriceHolder, Regulated, TollBoothOperatorI {
 	    
+	mapping (address => mapping (bytes32 => bool) ) public mUsedHash;
+	
 	function TollBoothOperator(bool paused, uint deposit, address regulator)
 	    public 
 	    Pausable(paused)
@@ -74,7 +76,8 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         //@todo vehicle not allowed on road system
         require(isTollBooth(entryBooth));
         require(msg.value > (getDeposit() * getMultiplier(vType)));
-        //@todo check for exitSecretHashed has been used
+        require(mUsedHash[entryBooth][exitSecretHashed] == false );
+        mUsedHash[entryBooth][exitSecretHashed] = true;
         LogRoadEntered(msg.sender,entryBooth, exitSecretHashed,DepositHolder.getDeposit());
         return true;
     }
