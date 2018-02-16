@@ -27,9 +27,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         public
         returns(bytes32 hashed)
     {
-        require(secret != 0);
-        // @todo match hash check
-        return hashed;
+        return keccak256(secret);;
     }
     
     /**
