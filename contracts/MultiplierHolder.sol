@@ -5,11 +5,7 @@ import './interfaces/MultiplierHolderI.sol';
 
 contract MultiplierHolder is Owned, MultiplierHolderI {
     
-    struct multiplierStruct {
-        uint multiplier;
-    }
-    
-    mapping(uint => multiplierStruct) public mMultiplier;
+    mapping(uint => uint) private mMultiplier;
     
 	function MultiplierHolder(){
 	}
@@ -44,11 +40,11 @@ contract MultiplierHolder is Owned, MultiplierHolderI {
         returns(bool success)
     {
         require(vehicleType != 0);
-        require(mMultiplier[vehicleType].multiplier != multiplier);
+        require(mMultiplier[vehicleType] != multiplier);
         if(multiplier == 0){
             delete mMultiplier[vehicleType];
         }else{
-            mMultiplier[vehicleType].multiplier = multiplier;
+            mMultiplier[vehicleType] = multiplier;
         }
         LogMultiplierSet(msg.sender,vehicleType,multiplier);
         return true;
@@ -65,6 +61,6 @@ contract MultiplierHolder is Owned, MultiplierHolderI {
         public
         returns(uint multiplier)
     {
-        return mMultiplier[vehicleType].multiplier;
+        return mMultiplier[vehicleType];
     }
 }
