@@ -12,6 +12,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
 	mapping( address => uint ) private mEnterRoadDeposit;
 	mapping( address => address ) private mEnterVehicleBooth;
 	mapping (bytes32 => address ) private mUsedHashVehicle;
+	mapping (bytes32 => uint ) private mUsedHash;
 	
 	function TollBoothOperator(bool paused, uint deposit, address regulator)
 	    public 
@@ -79,10 +80,12 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         require(isTollBooth(entryBooth));
         //@todo ess than deposit * multiplier was sent alongside.
         require(msg.value > (getDeposit() * getMultiplier(vType) ) );
+        require(mUsedHash[exitSecretHashed] > 0);
         //require(mEnterRoadDeposit[mEnterVehicleBooth[mUsedHashVehicle[exitSecretHashed]]] > 0 );
         mEnterRoadDeposit[entryBooth] = msg.value;
         mEnterVehicleBooth[msg.sender] = entryBooth;
         mUsedHashVehicle[exitSecretHashed] = msg.sender;
+        mUsedHash[exitSecretHashed] = msg.value;
         LogRoadEntered(vehicle,entryBooth, exitSecretHashed, msg.value );
         return true;
     }
