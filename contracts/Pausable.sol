@@ -59,8 +59,7 @@ contract Pausable is Owned, PausableI {
         constant 
         returns(bool isIndeed)
     {
-        require(paused == true);
-        return true;   
+        return paused;   
     }
 	
 }
