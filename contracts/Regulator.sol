@@ -11,12 +11,7 @@ contract Regulator is Owned, RegulatorI {
         bool exists;
     }
     
-    struct tollBoothOperatorStruct {
-        bool isApproved;
-        address tollBoothOperatorAddress;
-   }
-    
-    mapping (address => tollBoothOperatorStruct ) public mTollBoothOperators;
+    mapping (address => bool ) public mTollBoothOperators;
     mapping (address => Vehicle) public mVehicle;
     
 	function Regulator()
@@ -120,8 +115,7 @@ contract Regulator is Owned, RegulatorI {
         TollBoothOperator nOperator = new TollBoothOperator(true,deposit,owner);
         //nOperator.setOwner(owner);
         LogTollBoothOperatorCreated(msg.sender,owner,getOwner(),deposit);
-        mTollBoothOperators[owner].isApproved = true;
-        mTollBoothOperators[owner].tollBoothOperatorAddress = owner;
+        mTollBoothOperators[owner] = true;
         return nOperator;
     }
     
@@ -162,7 +156,7 @@ contract Regulator is Owned, RegulatorI {
         public
         returns(bool indeed)
     {
-        return mTollBoothOperators[operator].isApproved;
+        return mTollBoothOperators[operator];
         //return mTollBoothOperators[operator].tollBoothOperatorAddress;
     }
     
