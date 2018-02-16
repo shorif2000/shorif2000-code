@@ -51,6 +51,6 @@ contract Regulated is RegulatedI {
         public
         returns(RegulatorI regulator)
     {
-        return regulator;        
+        return RegulatorI(currentRegulator);      
     }
 }
