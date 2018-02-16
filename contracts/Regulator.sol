@@ -110,7 +110,7 @@ contract Regulator is Owned, RegulatorI {
         nOperator.setOwner(owner);
         LogTollBoothOperatorCreated(msg.sender,nOperator,owner,deposit);
         mTollBoothOperators[nOperator] = true;
-        return nOperator;
+        return TollBoothOperatorI(nOperator);
     }
     
     /**
