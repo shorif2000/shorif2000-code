@@ -6,13 +6,8 @@ import './TollBoothOperator.sol';
 
 contract Regulator is Owned, RegulatorI {
     
-    struct Vehicle {
-        uint vType;
-        bool exists;
-    }
-    
     mapping (address => bool ) public mTollBoothOperators;
-    mapping (address => Vehicle) public mVehicle;
+    mapping (address => uint) public mVehicle;
     
 	function Regulator()
 	{
@@ -57,12 +52,11 @@ contract Regulator is Owned, RegulatorI {
         returns(bool success)
     {
         require(vehicle != 0x0);
-        require(mVehicle[vehicle].vType != vehicleType);
+        require(mVehicle[vehicle] != vehicleType);
         if(vehicleType == 0){
             delete mVehicle[vehicle];
         }else{
-            mVehicle[vehicle].vType = vehicleType;
-            mVehicle[vehicle].exists = true;
+            mVehicle[vehicle] = vehicleType;
         }
         LogVehicleTypeSet(msg.sender, vehicle, vehicleType);
         return true;
@@ -78,7 +72,7 @@ contract Regulator is Owned, RegulatorI {
         public
         returns(uint vehicleType)
     {
-        return mVehicle[vehicle].vType;
+        return mVehicle[vehicle];
     }
     
     /**
@@ -115,7 +109,7 @@ contract Regulator is Owned, RegulatorI {
         TollBoothOperator nOperator = new TollBoothOperator(true,deposit,owner);
         nOperator.setOwner(owner);
         LogTollBoothOperatorCreated(msg.sender,nOperator,owner,deposit);
-        mTollBoothOperators[owner] = true;
+        mTollBoothOperators[nOperator] = true;
         return nOperator;
     }
     
@@ -137,7 +131,7 @@ contract Regulator is Owned, RegulatorI {
      * Emits LogTollBoothOperatorRemoved.
      */
     function removeOperator(address operator)
-        fromOwner()
+        fromOwner
         public
         returns(bool success)
     {
@@ -157,7 +151,6 @@ contract Regulator is Owned, RegulatorI {
         returns(bool indeed)
     {
         return mTollBoothOperators[operator];
-        //return mTollBoothOperators[operator].tollBoothOperatorAddress;
     }
     
 }
