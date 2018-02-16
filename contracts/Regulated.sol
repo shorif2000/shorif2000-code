@@ -9,6 +9,7 @@ contract Regulated is RegulatedI {
 	function Regulated(address regulator)
 	{
 		require(regulator != 0x0);
+		currentRegulator = regulator;
 	}
 	
 	/**
