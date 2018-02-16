@@ -83,7 +83,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         mEnterRoadDeposit[entryBooth] = msg.value;
         mEnterVehicleBooth[msg.sender] = entryBooth;
         mUsedHashVehicle[exitSecretHashed] = msg.sender;
-        LogRoadEntered(msg.sender,entryBooth, exitSecretHashed,msg.value * getMultiplier(vType) +1);
+        LogRoadEntered(msg.sender,entryBooth, exitSecretHashed,((msg.value * getMultiplier(vType)) +1) );
         return true;
     }
     
