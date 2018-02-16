@@ -74,12 +74,12 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
     {
         address vehicle = msg.sender;
         uint vType = Regulated.getRegulator().getVehicleType(vehicle);
-        require(vType > 0);
+        //require(vType > 0);
         //@todo vehicle not allowed on road system
-        require(isTollBooth(entryBooth));
-        //@todo less than deposit * multiplier was sent alongside.
+        //require(isTollBooth(entryBooth));
+        //@todo ess than deposit * multiplier was sent alongside.
         //require(msg.value >= (getDeposit() * getMultiplier(vType) ) );
-        require(mEnterRoadDeposit[mEnterVehicleBooth[mUsedHashVehicle[exitSecretHashed]]] > 0 );
+        //require(mEnterRoadDeposit[mEnterVehicleBooth[mUsedHashVehicle[exitSecretHashed]]] > 0 );
         mEnterRoadDeposit[mEnterVehicleBooth[mUsedHashVehicle[exitSecretHashed]]] = msg.value;
         LogRoadEntered(msg.sender,entryBooth, exitSecretHashed,DepositHolder.getDeposit());
         return true;
