@@ -4,7 +4,7 @@ import './interfaces/RegulatedI.sol';
 
 contract Regulated is RegulatedI {
     
-    address public currentRegulator;
+    address private currentRegulator;
     
 	function Regulated(address regulator)
 	{
