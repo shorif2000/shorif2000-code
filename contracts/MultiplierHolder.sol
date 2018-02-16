@@ -8,7 +8,8 @@ contract MultiplierHolder is Owned, MultiplierHolderI {
     struct multiplierStruct {
         uint multiplier;
     }
-    mapping(uint => multiplierStruct) private mMultiplier;
+    
+    mapping(uint => multiplierStruct) public mMultiplier;
     
 	function MultiplierHolder(){
 	}
