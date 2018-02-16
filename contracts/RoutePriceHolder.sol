@@ -6,12 +6,6 @@ import './interfaces/RoutePriceHolderI.sol';
 
 contract RoutePriceHolder is TollBoothHolder, RoutePriceHolderI {
     
-    struct routeStruct {
-        address entry;
-        address exit;
-        uint routecost;
-    }
-    
 	function RoutePriceHolder(){
 	}
 	
