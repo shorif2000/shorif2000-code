@@ -163,9 +163,10 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         require(msg.sender != entryBooth);
         //@todo exithash
         //@todo secret used
-        
-        //LogRoadExited(msg.sender,exitSecretClear);
-        return 0;
+        uint finalFee = getRoutePrice(entryBooth,msg.sender);
+        uint refundWeis = getDeposit() - finalFee;
+        LogRoadExited(msg.sender,exitSecretClear, finalFee, refundWeis);
+        return 1;
     }
     /**
      * @param entryBooth the entry booth that has pending payments.
