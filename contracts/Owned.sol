@@ -6,9 +6,12 @@ contract Owned is OwnedI {
     
 	address private currentOwner;
 	
-	function Ownable() 
+	function Owned() 
+	    public
 	{
+	    currentOwner = msg.sender;
 	}
+	
 	/*
 	 * @dev rolls back the transaction if the transaction sender is not the owner
 	 */
@@ -24,6 +27,7 @@ contract Owned is OwnedI {
      * @param newOwner The new, and current, owner the contract.
      */
     event LogOwnerSet(address indexed previousOwner, address indexed newOwner);
+    
     /**
      * Sets the new owner for this contract.
      *     It should roll back if the caller is not the current owner.
@@ -34,6 +38,7 @@ contract Owned is OwnedI {
      * Emits LogOwnerSet.
      */
     function setOwner(address newOwner)
+        public
         fromOwner
         returns(bool success)
     {
@@ -44,11 +49,13 @@ contract Owned is OwnedI {
         LogOwnerSet(owner,newOwner);
         return true;
     }
+    
     /**
      * @return The owner of this contract.
      */
     function getOwner() 
-        constant 
+        public
+        constant
         returns(address owner)
     {
         return currentOwner;
