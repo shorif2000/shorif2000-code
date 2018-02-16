@@ -65,12 +65,18 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
     function enterRoad(
             address entryBooth,
             bytes32 exitSecretHashed)
+        whenNotPaused
         public
         payable
         returns (bool success)
     {
+        address vehicle = msg.sender;
+        uint vType = Regulated.getRegulator().getVehicleType(vehicle);
+        require(vType > 0);
+        //@todo vehicle not allowed on road system
         require(isTollBooth(entryBooth));
-        //require(Regulator.mVehicle[msg.sender].vType > 0);
+        require(msg.value > (getDeposit() * getMultiplier(vType)));
+        //@todo check for exitSecretHashed has been used
         LogRoadEntered(msg.sender,entryBooth, exitSecretHashed,DepositHolder.getDeposit());
         return true;
     }
