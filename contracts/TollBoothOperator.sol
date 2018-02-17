@@ -12,6 +12,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
 	mapping( address => address ) private mEnterVehicleBooth;
 	mapping (bytes32 => address ) private mUsedHashVehicle;
 	mapping (bytes32 => uint ) private mUsedHash;
+	uint private collectedFees;
 	
 	function TollBoothOperator(bool paused, uint deposit, address regulator)
 	    public 
@@ -162,8 +163,10 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         require(mUsedHash[hashSecret(exitSecretClear)] > 0); //secret does not match a hashed one. && secret has already been reported on exit.
         mUsedHash[hashSecret(exitSecretClear)] = 0;
         uint finalFee = getDeposit() * getMultiplier(vType);//getRoutePrice(entryBooth,msg.sender);
+        collectedFees += finalFee;
         if(finalFee >= getDeposit()) //if the fee is equal to or higher than the deposit, then the whole deposit is used and no more is asked of the vehicle, now or before any future trip.
         {   
+            require(vehicle.send(depositedWeis - finalFee));
             LogRoadExited(msg.sender,hashSecret(exitSecretClear), finalFee, depositedWeis - finalFee);
             return 1;
         }
@@ -228,7 +231,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         public
         returns(uint amount)
     {
-        return DepositHolder.getDeposit();
+        return collectedFees;
     }
     /**
      * Event emitted when the owner collects the fees.
@@ -254,7 +257,9 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
     {
         require(DepositHolder.getDeposit() != 0);
         //@todo how to withdraw
-        LogFeesCollected(getOwner(),DepositHolder.getDeposit());
+        uint _collectedFees = collectedFees;
+        collectedFees = 0;
+        LogFeesCollected(getOwner(),_collectedFees);
         return true;
     }
    
