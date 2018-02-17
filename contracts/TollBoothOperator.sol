@@ -163,6 +163,11 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         require(mUsedHash[hashSecret(exitSecretClear)] > 0); //secret does not match a hashed one. && secret has already been reported on exit.
         mUsedHash[hashSecret(exitSecretClear)] = 0;
         uint finalFee = getDeposit() * getMultiplier(vType);//getRoutePrice(entryBooth,msg.sender);
+        
+        if(finalFee == 0){ //if the fee is not known at the time of exit, i.e. if the fee is 0, the pending payment is recorded, and "base route price required" event is emitted and listened to by the operator's oracle.
+            LogPendingPayment(hashSecret(exitSecretClear), entryBooth, msg.sender);
+            return 2;
+        }
         collectedFees += finalFee;
         if(finalFee >= getDeposit()) //if the fee is equal to or higher than the deposit, then the whole deposit is used and no more is asked of the vehicle, now or before any future trip.
         {   
@@ -174,11 +179,6 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         {
             LogRoadExited(msg.sender,hashSecret(exitSecretClear), finalFee, getDeposit() - finalFee);
             return 1;
-        }
-        else //if the fee is not known at the time of exit, i.e. if the fee is 0, the pending payment is recorded, and "base route price required" event is emitted and listened to by the operator's oracle.
-        {
-            LogPendingPayment(hashSecret(exitSecretClear), entryBooth, msg.sender);
-            return 2;
         }
     }      
     /**
