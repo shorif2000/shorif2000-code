@@ -170,7 +170,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             LogRoadExited(msg.sender,hashSecret(exitSecretClear), finalFee, depositedWeis - finalFee);
             return 1;
         }
-        else if (finalFee < getDeposit()) //if the fee is smaller than the deposit, then the difference is returned to the vehicle.
+        else if (finalFee > 0 && finalFee < getDeposit()) //if the fee is smaller than the deposit, then the difference is returned to the vehicle.
         {
             LogRoadExited(msg.sender,hashSecret(exitSecretClear), finalFee, getDeposit() - finalFee);
             return 1;
@@ -255,10 +255,10 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         public
         returns(bool success)
     {
-        require(DepositHolder.getDeposit() != 0);
-        //@todo how to withdraw
+        require(collectedFees != 0);
         uint _collectedFees = collectedFees;
         collectedFees = 0;
+        require(getOwner().send(_collectedFees));
         LogFeesCollected(getOwner(),_collectedFees);
         return true;
     }
