@@ -79,7 +79,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         require(isTollBooth(entryBooth));
         //@todo ess than deposit * multiplier was sent alongside.
         //require(msg.value > (getDeposit() * getMultiplier(vType) ) );
-        require(mUsedHash[exitSecretHashed] != 0); // 2 for used to exit
+        require(mUsedHash[exitSecretHashed] == 0); // 2 for used to exit
         //require(mEnterRoadDeposit[mEnterVehicleBooth[mUsedHashVehicle[exitSecretHashed]]] > 0 );
         mEnterVehicleBooth[msg.sender] = entryBooth;
         mUsedHashVehicle[exitSecretHashed] = msg.sender;
