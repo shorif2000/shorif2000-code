@@ -164,18 +164,26 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         //@todo exithash
         //@todo secret used
         uint finalFee = getRoutePrice(entryBooth,msg.sender);
-        uint refundWeis = getDeposit() - finalFee;
-        if(finalFee > 0)
-        {
-            LogRoadExited(msg.sender,exitSecretClear, finalFee, refundWeis);
-            return 1;
+        uint refundWeis = 0;
+        uint _status;
+        if(finalFee >= getDeposit()) //if the fee is equal to or higher than the deposit, then the whole deposit is used and no more is asked of the vehicle, now or before any future trip.
+        {   
+            LogRoadExited(msg.sender,exitSecretClear, finalFee, 0);
+            _status = 1;
         }
-        else
+        else if (finalFee < getDeposit()) //if the fee is smaller than the deposit, then the difference is returned to the vehicle.
+        {
+            refundWeis = getDeposit() - finalFee; 
+            LogRoadExited(msg.sender,exitSecretClear, finalFee, refundWeis);
+            _status;
+        }
+        else //if the fee is not known at the time of exit, i.e. if the fee is 0, the pending payment is recorded, and "base route price required" event is emitted and listened to by the operator's oracle.
         {
             LogPendingPayment(exitSecretClear, entryBooth, msg.sender);
-            return 2;
+            _status = 2;
         }
         
+        return status;
     }
     /**
      * @param entryBooth the entry booth that has pending payments.
