@@ -149,7 +149,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
      *   2: pending oracle -> emits LogPendingPayment
      */
     function reportExitRoad(bytes32 exitSecretClear)
-        //Pausable.whenNotPaused
+        whenNotPaused
         public
         returns (uint status)
     {
@@ -158,15 +158,24 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         address entryBooth;
         uint depositedWeis;
         (vehicle, entryBooth, depositedWeis) = getVehicleEntry(exitSecretClear);
-        require(Regulated.getRegulator().getVehicleType(vehicle) > 0);
+        //require(Regulated.getRegulator().getVehicleType(vehicle) > 0);
         //@todo vehicle is no longer allowed on this road system.
         require(msg.sender != entryBooth);
         //@todo exithash
         //@todo secret used
         uint finalFee = getRoutePrice(entryBooth,msg.sender);
         uint refundWeis = getDeposit() - finalFee;
-        LogRoadExited(msg.sender,exitSecretClear, finalFee, refundWeis);
-        return 1;
+        if(finalFee > 0)
+        {
+            LogRoadExited(msg.sender,exitSecretClear, finalFee, refundWeis);
+            return 1;
+        }
+        else
+        {
+            LogPendingPayment(exitSecretClear, entryBooth, msg.sender);
+            return 2;
+        }
+        
     }
     /**
      * @param entryBooth the entry booth that has pending payments.
