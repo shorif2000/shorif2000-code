@@ -212,13 +212,15 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             address entryBooth,
             address exitBooth,
             uint count)
-        //whenNotPaused
+        whenNotPaused
         public
         returns (bool success)
     {
         require(isTollBooth(entryBooth));
         require(isTollBooth(exitBooth));
+        require(pendingPayments != 0);
         require(count != 0);
+        pendingPayments -= 1;
         return true;
     }
     /**
