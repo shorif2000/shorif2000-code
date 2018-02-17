@@ -156,12 +156,10 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         address entryBooth;
         uint depositedWeis;
         (vehicle, entryBooth, depositedWeis) = getVehicleEntry(hashSecret(exitSecretClear));
-        require(isTollBooth(entryBooth));
         uint vType = Regulated.getRegulator().getVehicleType(vehicle);
-        require(vType > 0);
-        //@todo vehicle is no longer allowed on this road system.
+        require(vType > 0); // vehicle is no longer a registered vehicle. && vehicle is no longer allowed on this road system.
         require(msg.sender != entryBooth);
-        //@todo exithash
+        require(mUsedHash[hashSecret(exitSecretClear)] > 0); //secret does not match a hashed one. && secret has already been reported on exit.
         mUsedHash[hashSecret(exitSecretClear)] = 0;
         uint finalFee = getDeposit() * getMultiplier(vType);//getRoutePrice(entryBooth,msg.sender);
         if(finalFee >= getDeposit()) //if the fee is equal to or higher than the deposit, then the whole deposit is used and no more is asked of the vehicle, now or before any future trip.
