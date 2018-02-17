@@ -9,7 +9,6 @@ import './interfaces/TollBoothOperatorI.sol';
 
 contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePriceHolder, Regulated, TollBoothOperatorI {
 	    
-	//mapping( address => uint ) private mEnterRoadDeposit;
 	mapping( address => address ) private mEnterVehicleBooth;
 	mapping (bytes32 => address ) private mUsedHashVehicle;
 	mapping (bytes32 => uint ) private mUsedHash;
@@ -82,7 +81,6 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         //require(msg.value > (getDeposit() * getMultiplier(vType) ) );
         require(mUsedHash[exitSecretHashed] == 0);
         //require(mEnterRoadDeposit[mEnterVehicleBooth[mUsedHashVehicle[exitSecretHashed]]] > 0 );
-        //mEnterRoadDeposit[entryBooth] = msg.value;
         mEnterVehicleBooth[msg.sender] = entryBooth;
         mUsedHashVehicle[exitSecretHashed] = msg.sender;
         mUsedHash[exitSecretHashed] = msg.value;
@@ -164,8 +162,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         //@todo vehicle is no longer allowed on this road system.
         require(msg.sender != entryBooth);
         //@todo exithash
-        mUsedHash[exitSecretClear] = 0;
-        //mEnterRoadDeposit[mEnterVehicleBooth[mUsedHashVehicle[exitSecretClear]]] = 0;
+        mUsedHash[hashSecret(exitSecretClear)] = 0;
         uint finalFee = getDeposit() * getMultiplier(vType);//getRoutePrice(entryBooth,msg.sender);
         if(finalFee >= getDeposit()) //if the fee is equal to or higher than the deposit, then the whole deposit is used and no more is asked of the vehicle, now or before any future trip.
         {   
