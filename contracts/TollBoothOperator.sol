@@ -310,21 +310,27 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
                 count = getPendingPaymentCount(entryBooth,exitBooth);
             }
             mPendingPayments[entryBooth][exitBooth] -= 1;
-            uint fee = getDeposit() * getMultiplier(mSecret[entryBooth][exitBooth][count].vType);
+             
+            
+            
             address vehicle2;
             address entryBooth2;
             uint depositedW;
             (vehicle2, entryBooth2, depositedW) = getVehicleEntry(mSecret[entryBooth][exitBooth][count].secretHashed);
             mUsedHash[mSecret[entryBooth][exitBooth][count].secretHashed] = 0;
-            collectedFees += fee;
-            if(fee >= getDeposit()) //if the fee is equal to or higher than the deposit, then the whole deposit is used and no more is asked of the vehicle, now or before any future trip.
-            {   
+            
+            
+            uint fee = getDeposit() * getMultiplier(mSecret[entryBooth][exitBooth][count].vType);
+            if(getRoutePrice(entryBooth,exitBooth) > getDeposit())
+            {
+                collectedFees += fee + (depositedW - fee);
+                LogRoadExited(exitBooth,mSecret[entryBooth][exitBooth][count].secretHashed, fee + (depositedW - fee), 0);
+            }
+            else
+            {
+                collectedFees += fee;
                 vehicle2.transfer(depositedW - fee);
                 LogRoadExited(exitBooth,mSecret[entryBooth][exitBooth][count].secretHashed, fee, depositedW - fee);
-            }
-            else if (fee < getDeposit()) //if the fee is smaller than the deposit, then the difference is returned to the vehicle.
-            {
-                LogRoadExited(exitBooth,mSecret[entryBooth][exitBooth][count].secretHashed, fee, getDeposit() - fee);
             }
         }
         return true;
