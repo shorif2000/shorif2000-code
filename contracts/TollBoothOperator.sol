@@ -291,7 +291,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         returns(bool success)
     {
         RoutePriceHolder.setRoutePrice(entryBooth, exitBooth, priceWeis);
-        if(getRoutePrice(entryBooth, exitBooth) > 0) { 
+        if(getPendingPaymentCount(entryBooth, exitBooth) > 0) { 
             mPendingPayments[entryBooth][exitBooth] -= 1;
             LogRoadExited(msg.sender, hashSecret('exitSecretClear'), priceWeis, 0);
         }
