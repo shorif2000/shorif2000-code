@@ -5,7 +5,7 @@ import './interfaces/TollBoothHolderI.sol';
 
 contract TollBoothHolder is Owned, TollBoothHolderI {
     
-    mapping (address => bool) public mTollBooth;
+    mapping (address => bool) private mTollBooth;
     
 	function TollBoothHolder(){
 	}
