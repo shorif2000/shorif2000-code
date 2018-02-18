@@ -221,10 +221,14 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
     {
         require(isTollBooth(entryBooth));
         require(isTollBooth(exitBooth));
-        require(pendingPayments != 0);
+        require(mPendingExit[mPendingEntry[entryBooth]] >= count);
         require(count != 0);
-        mPendingExit[mPendingEntry[entryBooth]] -= 1;
-        LogRoadExited(exitBooth,0,0,0);
+        for(uint i; i < count; i++) 
+        {
+            mPendingExit[mPendingEntry[entryBooth]] -= 1;
+            LogRoadExited(exitBooth,0,0,0);
+        }
+        
         return true;
     }
     /**
