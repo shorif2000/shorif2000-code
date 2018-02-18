@@ -6,8 +6,8 @@ import './TollBoothOperator.sol';
 
 contract Regulator is Owned, RegulatorI {
     
-    mapping (address => bool ) public mTollBoothOperators;
-    mapping (address => uint) public mVehicle;
+    mapping (address => bool ) private mTollBoothOperators;
+    mapping (address => uint) private mVehicle;
     
 	function Regulator()
 	{
