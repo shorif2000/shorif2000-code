@@ -300,7 +300,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
     {
         RoutePriceHolder.setRoutePrice(entryBooth, exitBooth, priceWeis);
         if(getPendingPaymentCount(entryBooth, exitBooth) > 0) { 
-            uint count = getPendingPaymentCount(entryBooth,msg.sender) -1;
+            uint count = getPendingPaymentCount(entryBooth,exitBooth) -1;
             mPendingPayments[entryBooth][exitBooth] -= 1;
             uint fee = getDeposit() * getMultiplier(mSecret[entryBooth][exitBooth][count].vType);
             LogRoadExited(exitBooth, mSecret[entryBooth][exitBooth][count].secretHashed, fee, 0);
