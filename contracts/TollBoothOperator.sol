@@ -300,10 +300,32 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
     {
         RoutePriceHolder.setRoutePrice(entryBooth, exitBooth, priceWeis);
         if(getPendingPaymentCount(entryBooth, exitBooth) > 0) { 
-            uint count = getPendingPaymentCount(entryBooth,exitBooth);
+            uint count;
+            if(getPendingPaymentCount(entryBooth,exitBooth) > 1)
+            {
+                count = getPendingPaymentCount(entryBooth,exitBooth)-1;
+            }
+            else
+            {
+                count = getPendingPaymentCount(entryBooth,exitBooth);
+            }
             mPendingPayments[entryBooth][exitBooth] -= 1;
             uint fee = getDeposit() * getMultiplier(mSecret[entryBooth][exitBooth][count].vType);
-            LogRoadExited(exitBooth, mSecret[entryBooth][exitBooth][count].secretHashed, fee, 0);
+            address vehicle2;
+            address entryBooth2;
+            uint depositedW;
+            (vehicle2, entryBooth2, depositedW) = getVehicleEntry(mSecret[entryBooth][exitBooth][count].secretHashed);
+            mUsedHash[mSecret[entryBooth][exitBooth][count].secretHashed] = 0;
+            collectedFees += fee;
+            if(fee >= getDeposit()) //if the fee is equal to or higher than the deposit, then the whole deposit is used and no more is asked of the vehicle, now or before any future trip.
+            {   
+                vehicle2.transfer(depositedW - fee);
+                LogRoadExited(exitBooth,mSecret[entryBooth][exitBooth][count].secretHashed, fee, depositedW - fee);
+            }
+            else if (fee < getDeposit()) //if the fee is smaller than the deposit, then the difference is returned to the vehicle.
+            {
+                LogRoadExited(exitBooth,mSecret[entryBooth][exitBooth][count].secretHashed, fee, getDeposit() - fee);
+            }
         }
         return true;
     }
