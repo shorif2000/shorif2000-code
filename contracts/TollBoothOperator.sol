@@ -14,12 +14,13 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
 	mapping (bytes32 => uint ) private mUsedHash;
 	uint private collectedFees;
 	mapping (address => mapping ( address => uint) ) private mPendingPayments;
-	
+	mapping (address => mapping ( address => uint) ) private mPendingPaymentPointer;
 	struct SecretStruct {
 	    bytes32 secretHashed;
 	    uint vType;
 	}
 	mapping ( address => mapping ( address => mapping ( uint => SecretStruct) ) ) private mSecret;
+	
 	
 	function TollBoothOperator(bool paused, uint deposit, address regulator)
 	    public 
@@ -202,7 +203,8 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
     {
         require(isTollBooth(entryBooth));
         require(isTollBooth(exitBooth));
-        return mPendingPayments[entryBooth][exitBooth];
+        
+        return mPendingPayments[entryBooth][exitBooth] ;
     }
     /**
      * Can be called by anyone. In case more than 1 payment was pending when the oracle gave a price.
@@ -226,13 +228,30 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
     {
         require(isTollBooth(entryBooth));
         require(isTollBooth(exitBooth));
-        require(count >= mPendingPayments[entryBooth][exitBooth]);
+        require(count >= getPendingPaymentCount(entryBooth, exitBooth) );
         require(count != 0);
-        mPendingPayments[entryBooth][exitBooth] -= count;
-        for(uint i; i < count; i++) 
+        
+        
+        for(uint i = 0; i < count; i++) 
         {
-            LogRoadExited(exitBooth,0,0,0);
+            mPendingPaymentPointer[entryBooth][exitBooth]++;
+            address vehicle2;
+            address entryBooth2;
+            uint depositedW;
+            (vehicle2, entryBooth2, depositedW) = getVehicleEntry(mSecret[entryBooth][exitBooth][mPendingPaymentPointer[entryBooth][exitBooth]].secretHashed);
+            uint fee = getDeposit() * getMultiplier(mSecret[entryBooth][exitBooth][mPendingPaymentPointer[entryBooth][exitBooth]].vType);
+            collectedFees += fee;
+            uint refund = depositedW - fee;
+            if(refund > 0)
+            {
+                vehicle2.transfer(depositedW - fee);
+            }
+            
+            LogRoadExited(exitBooth,mSecret[entryBooth][exitBooth][mPendingPaymentPointer[entryBooth][exitBooth]].secretHashed,fee,refund);
+            
         }
+        
+        mPendingPayments[entryBooth][exitBooth] -= count;
         
         return true;
     }
@@ -300,15 +319,13 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
     {
         RoutePriceHolder.setRoutePrice(entryBooth, exitBooth, priceWeis);
         if(getPendingPaymentCount(entryBooth, exitBooth) > 0) { 
-            uint count;
-            if(getPendingPaymentCount(entryBooth,exitBooth) > 1)
+            
+            uint count = mPendingPaymentPointer[entryBooth][exitBooth];
+            if( count == 0)
             {
-                count = getPendingPaymentCount(entryBooth,exitBooth)-1;
+                count = 1;
             }
-            else
-            {
-                count = getPendingPaymentCount(entryBooth,exitBooth);
-            }
+
             mPendingPayments[entryBooth][exitBooth] -= 1;
              
             
@@ -332,6 +349,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
                 vehicle2.transfer(depositedW - fee);
                 LogRoadExited(exitBooth,mSecret[entryBooth][exitBooth][count].secretHashed, fee, depositedW - fee);
             }
+            mPendingPaymentPointer[entryBooth][exitBooth]++;
         }
         return true;
     }
