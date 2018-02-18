@@ -302,7 +302,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         if(getPendingPaymentCount(entryBooth, exitBooth) > 0) { 
             mPendingPayments[entryBooth][exitBooth] -= 1;
             //uint finalFee = getDeposit() * getMultiplier(vType);
-            LogRoadExited(exitBooth, mSecret[entryBooth][msg.sender].secretHashed, priceWeis, 0);
+            LogRoadExited(exitBooth, mSecret[entryBooth][exitBooth].secretHashed, priceWeis, 0);
         }
         return true;
     }
