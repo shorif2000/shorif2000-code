@@ -321,10 +321,10 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         RoutePriceHolder.setRoutePrice(entryBooth, exitBooth, priceWeis);
         if(getPendingPaymentCount(entryBooth, exitBooth) > 0) { 
             
-            uint count = mPendingPaymentPointer[entryBooth][exitBooth];
-            if( count == 0)
+            uint index = mPendingPaymentPointer[entryBooth][exitBooth];
+            if( index == 0)
             {
-                count = 1;
+                index = 1;
             }
 
             mPendingPayments[entryBooth][exitBooth] -= 1;
@@ -332,20 +332,20 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             address vehicle2;
             address entryBooth2;
             uint depositedW;
-            (vehicle2, entryBooth2, depositedW) = getVehicleEntry(mSecret[entryBooth][exitBooth][count].secretHashed);
-            mUsedHash[mSecret[entryBooth][exitBooth][count].secretHashed] = 0;
+            (vehicle2, entryBooth2, depositedW) = getVehicleEntry(mSecret[entryBooth][exitBooth][index].secretHashed);
+            mUsedHash[mSecret[entryBooth][exitBooth][index].secretHashed] = 0;
             
-            uint fee = getDeposit() * getMultiplier(mSecret[entryBooth][exitBooth][count].vType);
+            uint fee = getDeposit() * getMultiplier(mSecret[entryBooth][exitBooth][index].vType);
             if(getRoutePrice(entryBooth,exitBooth) > getDeposit())
             {
                 collectedFees += fee + (depositedW - fee);
-                LogRoadExited(exitBooth,mSecret[entryBooth][exitBooth][count].secretHashed, fee + (depositedW - fee), 0);
+                LogRoadExited(exitBooth,mSecret[entryBooth][exitBooth][index].secretHashed, fee + (depositedW - fee), 0);
             }
             else
             {
                 collectedFees += fee;
                 vehicle2.transfer(depositedW - fee);
-                LogRoadExited(exitBooth,mSecret[entryBooth][exitBooth][count].secretHashed, fee, depositedW - fee);
+                LogRoadExited(exitBooth,mSecret[entryBooth][exitBooth][index].secretHashed, fee, depositedW - fee);
             }
             mPendingPaymentPointer[entryBooth][exitBooth]++;
         }
