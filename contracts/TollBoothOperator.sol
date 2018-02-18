@@ -238,7 +238,8 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             address vehicle2;
             address entryBooth2;
             uint depositedW;
-            (vehicle2, entryBooth2, depositedW) = getVehicleEntry(mSecret[entryBooth][exitBooth][mPendingPaymentPointer[entryBooth][exitBooth]].secretHashed);
+            bytes32 secretHashed = mSecret[entryBooth][exitBooth][mPendingPaymentPointer[entryBooth][exitBooth]].secretHashed;
+            (vehicle2, entryBooth2, depositedW) = getVehicleEntry(secretHashed);
             uint fee = getDeposit() * getMultiplier(mSecret[entryBooth][exitBooth][mPendingPaymentPointer[entryBooth][exitBooth]].vType);
             collectedFees += fee;
             uint refund = depositedW - fee;
@@ -246,8 +247,8 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             {
                 vehicle2.transfer(depositedW - fee);
             }
-            
-            LogRoadExited(exitBooth,mSecret[entryBooth][exitBooth][mPendingPaymentPointer[entryBooth][exitBooth]].secretHashed,fee,refund);
+            mUsedHash[secretHashed] = 0;
+            LogRoadExited(exitBooth,secretHashed,fee,refund);
             
         }
         
@@ -327,15 +328,12 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             }
 
             mPendingPayments[entryBooth][exitBooth] -= 1;
-             
-            
             
             address vehicle2;
             address entryBooth2;
             uint depositedW;
             (vehicle2, entryBooth2, depositedW) = getVehicleEntry(mSecret[entryBooth][exitBooth][count].secretHashed);
             mUsedHash[mSecret[entryBooth][exitBooth][count].secretHashed] = 0;
-            
             
             uint fee = getDeposit() * getMultiplier(mSecret[entryBooth][exitBooth][count].vType);
             if(getRoutePrice(entryBooth,exitBooth) > getDeposit())
