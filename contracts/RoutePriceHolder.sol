@@ -6,7 +6,7 @@ import './interfaces/RoutePriceHolderI.sol';
 
 contract RoutePriceHolder is TollBoothHolder, RoutePriceHolderI {
     
-    mapping (address => mapping ( address => uint ) ) public mRoutePrice;
+    mapping (address => mapping ( address => uint ) ) private mRoutePrice;
     
 	function RoutePriceHolder(){
 	}
