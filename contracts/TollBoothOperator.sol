@@ -14,6 +14,8 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
 	mapping (bytes32 => uint ) private mUsedHash;
 	uint private collectedFees;
 	uint private pendingPayments;
+	mapping (address => address ) private mPendingEntry;
+	mapping (address => uint ) private mPendingExit;
 	
 	function TollBoothOperator(bool paused, uint deposit, address regulator)
 	    public 
@@ -162,7 +164,8 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         require(msg.sender != entryBooth);
         require(mUsedHash[hashSecret(exitSecretClear)] > 0); //secret does not match a hashed one. && secret has already been reported on exit.
         if(getRoutePrice(entryBooth,msg.sender) == 0){ //if the fee is not known at the time of exit, i.e. if the fee is 0, the pending payment is recorded, and "base route price required" event is emitted and listened to by the operator's oracle.
-            pendingPayments += 1;
+            mPendingEntry[entryBooth] = msg.sender;
+            mPendingExit[mPendingEntry[entryBooth]] += 1;
             LogPendingPayment(hashSecret(exitSecretClear), entryBooth, msg.sender);
             return 2;
         }
@@ -194,7 +197,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
     {
         require(isTollBooth(entryBooth));
         require(isTollBooth(exitBooth));
-        return pendingPayments;
+        return mPendingExit[mPendingEntry[entryBooth]];
     }
     /**
      * Can be called by anyone. In case more than 1 payment was pending when the oracle gave a price.
@@ -220,7 +223,8 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         require(isTollBooth(exitBooth));
         require(pendingPayments != 0);
         require(count != 0);
-        pendingPayments -= 1;
+        mPendingExit[mPendingEntry[entryBooth]] -= 1;
+        LogRoadExited(exitBooth,0,0,0);
         return true;
     }
     /**
