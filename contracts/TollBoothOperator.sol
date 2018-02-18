@@ -19,7 +19,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
 	    bytes32 secretHashed;
 	    uint vType;
 	}
-	mapping ( address => mapping ( address => SecretStruct ) ) private mSecret;
+	mapping ( address => mapping ( address => mapping ( uint => SecretStruct) ) ) private mSecret;
 	
 	function TollBoothOperator(bool paused, uint deposit, address regulator)
 	    public 
@@ -168,8 +168,8 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         require(msg.sender != entryBooth);
         require(mUsedHash[hashSecret(exitSecretClear)] > 0); //secret does not match a hashed one. && secret has already been reported on exit.
         if(getRoutePrice(entryBooth,msg.sender) == 0){ //if the fee is not known at the time of exit, i.e. if the fee is 0, the pending payment is recorded, and "base route price required" event is emitted and listened to by the operator's oracle.
-            mSecret[entryBooth][msg.sender].secretHashed = exitSecretClear;
-            mSecret[entryBooth][msg.sender].vType = vType;
+            mSecret[entryBooth][msg.sender][getPendingPaymentCount(entryBooth,msg.sender)].secretHashed = hashSecret(exitSecretClear);
+            mSecret[entryBooth][msg.sender][getPendingPaymentCount(entryBooth,msg.sender)].vType = vType;
             mPendingPayments[entryBooth][msg.sender] += 1;
             LogPendingPayment(hashSecret(exitSecretClear), entryBooth, msg.sender);
             return 2;
@@ -300,9 +300,10 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
     {
         RoutePriceHolder.setRoutePrice(entryBooth, exitBooth, priceWeis);
         if(getPendingPaymentCount(entryBooth, exitBooth) > 0) { 
+            uint count = getPendingPaymentCount(entryBooth,msg.sender) -1;
             mPendingPayments[entryBooth][exitBooth] -= 1;
-            //uint finalFee = getDeposit() * getMultiplier(vType);
-            LogRoadExited(exitBooth, mSecret[entryBooth][exitBooth].secretHashed, priceWeis, 0);
+            uint fee = getDeposit() * getMultiplier(mSecret[entryBooth][exitBooth][count].vType);
+            LogRoadExited(exitBooth, mSecret[entryBooth][exitBooth][count].secretHashed, fee, 0);
         }
         return true;
     }
