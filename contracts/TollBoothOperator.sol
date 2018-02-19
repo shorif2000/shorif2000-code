@@ -290,8 +290,8 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         public
         returns(bool success)
     {
-        require(collectedFees != 0);
-        uint _collectedFees = collectedFees + getDeposit();
+        require(collectedFees > 0);
+        uint _collectedFees = collectedFees ;
         collectedFees = 0;
         getOwner().transfer(_collectedFees);
         LogFeesCollected(getOwner(),_collectedFees);
