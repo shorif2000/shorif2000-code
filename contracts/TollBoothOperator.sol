@@ -86,7 +86,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         require(vType > 0);
         require(isTollBooth(entryBooth));
         //@todo ess than deposit * multiplier was sent alongside.
-        //require(msg.value > (getDeposit() * getMultiplier(vType) ) );
+        require(msg.value >= (getDeposit() * getMultiplier(vType) ) );
         require(mUsedHash[exitSecretHashed] == 0); // 2 for used to exit
         //require(mEnterRoadDeposit[mEnterVehicleBooth[mUsedHashVehicle[exitSecretHashed]]] > 0 );
         mEnterVehicleBooth[msg.sender] = entryBooth;
@@ -175,18 +175,20 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             LogPendingPayment(hashSecret(exitSecretClear), entryBooth, msg.sender);
             return 2;
         }
+        uint finalFee =  getRoutePrice(entryBooth,msg.sender) * getMultiplier(vType); //mUsedHash[hashSecret(exitSecretClear)] * getMultiplier(vType);
         mUsedHash[hashSecret(exitSecretClear)] = 0;
-        uint finalFee = getDeposit() * getMultiplier(vType);//getRoutePrice(entryBooth,msg.sender);
+        //uint finalFee = getDeposit() * getMultiplier(vType);//getRoutePrice(entryBooth,msg.sender);
         collectedFees += finalFee;
-        if(finalFee >= getDeposit()) //if the fee is equal to or higher than the deposit, then the whole deposit is used and no more is asked of the vehicle, now or before any future trip.
+        if(finalFee >= depositedWeis) //if the fee is equal to or higher than the deposit, then the whole deposit is used and no more is asked of the vehicle, now or before any future trip.
         {   
-            vehicle.transfer(depositedWeis - finalFee);
-            LogRoadExited(msg.sender,hashSecret(exitSecretClear), finalFee, depositedWeis - finalFee);
+            //vehicle.transfer(depositedWeis - finalFee);
+            LogRoadExited(msg.sender,hashSecret(exitSecretClear), finalFee, 0);
             return 1;
         }
-        else if (finalFee < getDeposit()) //if the fee is smaller than the deposit, then the difference is returned to the vehicle.
+        else if (finalFee < depositedWeis) //if the fee is smaller than the deposit, then the difference is returned to the vehicle.
         {
-            LogRoadExited(msg.sender,hashSecret(exitSecretClear), finalFee, getDeposit() - finalFee);
+            vehicle.transfer(depositedWeis - finalFee);
+            LogRoadExited(msg.sender,hashSecret(exitSecretClear), finalFee, depositedWeis - finalFee);
             return 1;
         }
     }      
@@ -240,12 +242,13 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             uint depositedW;
             bytes32 secretHashed = mSecret[entryBooth][exitBooth][mPendingPaymentPointer[entryBooth][exitBooth]].secretHashed;
             (vehicle2, entryBooth2, depositedW) = getVehicleEntry(secretHashed);
-            uint fee = getDeposit() * getMultiplier(mSecret[entryBooth][exitBooth][mPendingPaymentPointer[entryBooth][exitBooth]].vType);
+            //uint fee = getDeposit() * getMultiplier(mSecret[entryBooth][exitBooth][mPendingPaymentPointer[entryBooth][exitBooth]].vType);
+            uint fee =  getRoutePrice(entryBooth,exitBooth) * getMultiplier(mSecret[entryBooth][exitBooth][mPendingPaymentPointer[entryBooth][exitBooth]].vType);
             collectedFees += fee;
             uint refund = depositedW - fee;
             if(refund > 0)
             {
-                vehicle2.transfer(depositedW - fee);
+                vehicle2.transfer(refund);
             }
             mUsedHash[secretHashed] = 0;
             LogRoadExited(exitBooth,secretHashed,fee,refund);
@@ -291,7 +294,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         returns(bool success)
     {
         require(collectedFees != 0);
-        uint _collectedFees = collectedFees;
+        uint _collectedFees = collectedFees + getDeposit();
         collectedFees = 0;
         getOwner().transfer(_collectedFees);
         LogFeesCollected(getOwner(),_collectedFees);
@@ -335,11 +338,12 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             (vehicle2, entryBooth2, depositedW) = getVehicleEntry(mSecret[entryBooth][exitBooth][index].secretHashed);
             mUsedHash[mSecret[entryBooth][exitBooth][index].secretHashed] = 0;
             
-            uint fee = getDeposit() * getMultiplier(mSecret[entryBooth][exitBooth][index].vType);
-            if(getRoutePrice(entryBooth,exitBooth) > getDeposit())
+            uint fee = getRoutePrice(entryBooth2,exitBooth) * getMultiplier(mSecret[entryBooth][exitBooth][index].vType);
+	    
+            if(fee > depositedW)
             {
-                collectedFees += fee + (depositedW - fee);
-                LogRoadExited(exitBooth,mSecret[entryBooth][exitBooth][index].secretHashed, fee + (depositedW - fee), 0);
+                collectedFees += depositedW;//fee + (depositedW - fee);
+                LogRoadExited(exitBooth,mSecret[entryBooth][exitBooth][index].secretHashed, fee +( depositedW-fee), 0);
             }
             else
             {
