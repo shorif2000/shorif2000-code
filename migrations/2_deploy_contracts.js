@@ -22,3 +22,4 @@ module.exports = function(deployer, network, accounts) {
        return operator.setPaused(false, { from: owner1 });
    });
 };
+
