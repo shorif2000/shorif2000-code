@@ -15,8 +15,9 @@ contract('TollBoothOperator', function(accounts) {
         vehicle1, vehicle2,
         regulator, operator;
     const price01 = randomIntIn(1, 1000);
-    const deposit = 10;//price01 + randomIntIn(1, 1000);
-    //const deposit1 = deposit0 + randomIntIn(1, 1000);
+    const deposit = 1;//price01 + randomIntIn(1, 1000);
+    const deposit1 = 10
+    const deposit2 = 15;
     const vehicleType1 = 1;//vehicleType0 + randomIntIn(1, 1000);
     const multiplier0 = 1;//randomIntIn(1, 1000);
     const multiplier1 = 1;//multiplier0 + randomIntIn(1, 1000);
@@ -50,7 +51,7 @@ contract('TollBoothOperator', function(accounts) {
                 .then(tx => operator.addTollBooth(booth1, { from: owner1 }))
                 .then(tx => operator.addTollBooth(booth2, { from: owner1 }))
                 .then(tx => operator.setMultiplier(vehicleType1, multiplier1, { from: owner1 }))
-                .then(tx => operator.setRoutePrice(booth1, booth2, deposit, { from: owner1 }))
+                .then(tx => operator.setRoutePrice(booth1, booth2, deposit1, { from: owner1 }))
                 .then(tx => operator.setPaused(false, { from: owner1 }))
                 .then(tx => operator.hashSecret(secret0))
                 .then(hash => hashed0 = hash)
@@ -60,10 +61,10 @@ contract('TollBoothOperator', function(accounts) {
 
 	it("vehicle should enter booth1 and exit booth2 with no refunds", function() {
 	  return operator.enterRoad.call(
-                        booth1, hashed0, { from: vehicle1, value: deposit })
+                        booth1, hashed0, { from: vehicle1, value: deposit1 * multiplier0 })
                     .then(success => assert.isTrue(success))
                     .then(() => operator.enterRoad(
-                        booth1, hashed0, { from: vehicle1, value: deposit }))
+                        booth1, hashed0, { from: vehicle1, value: deposit1 * multiplier0 }))
                     .then(tx => {
                         assert.strictEqual(tx.receipt.logs.length, 1);
                         assert.strictEqual(tx.logs.length, 1);
@@ -72,17 +73,17 @@ contract('TollBoothOperator', function(accounts) {
                         assert.strictEqual(logEntered.args.vehicle, vehicle1);
                         assert.strictEqual(logEntered.args.entryBooth, booth1);
                         assert.strictEqual(logEntered.args.exitSecretHashed, hashed0);
-                        assert.strictEqual(logEntered.args.depositedWeis.toNumber(), deposit);
+                        assert.strictEqual(logEntered.args.depositedWeis.toNumber(), deposit1);
                         // console.log(tx.receipt.gasUsed);
                         return operator.getVehicleEntry(hashed0);
                     })
                     .then(info => {
                         assert.strictEqual(info[0], vehicle1);
                         assert.strictEqual(info[1], booth1);
-                        assert.strictEqual(info[2].toNumber(), deposit * multiplier1);
+                        assert.strictEqual(info[2].toNumber(), deposit1 * multiplier1);
                         return web3.eth.getBalancePromise(operator.address);
                     })
-                    .then(balance => assert.strictEqual(balance.toNumber(), deposit * multiplier1 ))
+                    .then(balance => assert.strictEqual(balance.toNumber(), deposit1 * multiplier1 ))
 		    .then(() => operator.reportExitRoad.call(secret0, { from: booth2 }))
                     .then(result => assert.strictEqual(result.toNumber(), 1))
                     .then(() => operator.reportExitRoad(secret0, { from: booth2 }))
@@ -93,12 +94,71 @@ contract('TollBoothOperator', function(accounts) {
                         assert.strictEqual(logExited.event, "LogRoadExited");
                         assert.strictEqual(logExited.args.exitBooth, booth2);
                         assert.strictEqual(logExited.args.exitSecretHashed, hashed0);
-                        assert.strictEqual(logExited.args.finalFee.toNumber(), deposit * multiplier0);
+                        assert.strictEqual(logExited.args.finalFee.toNumber(), deposit1 * multiplier0);
                         assert.strictEqual(logExited.args.refundWeis.toNumber(), 0);
                         // console.log(tx.receipt.gasUsed);
                     });
 	});
 
+    });
+
+    describe("senario2", function() {
+	 beforeEach("should deploy regulator and operator", function() {
+            return Regulator.new({ from: owner0 })
+                .then(instance => regulator = instance)
+                .then(tx => regulator.setVehicleType(vehicle1, vehicleType1, { from: owner0 }))
+                .then(tx => regulator.createNewOperator(owner1, deposit, { from: owner0 }))
+                .then(tx => operator = TollBoothOperator.at(tx.logs[1].args.newOperator))
+                .then(tx => operator.addTollBooth(booth1, { from: owner1 }))
+                .then(tx => operator.addTollBooth(booth2, { from: owner1 }))
+                .then(tx => operator.setMultiplier(vehicleType1, multiplier1, { from: owner1 }))
+                .then(tx => operator.setRoutePrice(booth1, booth2, deposit2, { from: owner1 }))
+                .then(tx => operator.setPaused(false, { from: owner1 }))
+                .then(tx => operator.hashSecret(secret0))
+                .then(hash => hashed0 = hash)
+                .then(tx => operator.hashSecret(secret1))
+                .then(hash => hashed1 = hash);
+        });
+	it("vehicle should enter booth1 and exit booth2 and pay less deposit than route price and get no refund", function() {
+	  return operator.enterRoad.call(
+                        booth1, hashed0, { from: vehicle1, value: deposit1 })
+                    .then(success => assert.isTrue(success))
+                    .then(() => operator.enterRoad(
+                        booth1, hashed0, { from: vehicle1, value: deposit1 }))
+                    .then(tx => {
+                        assert.strictEqual(tx.receipt.logs.length, 1);
+                        assert.strictEqual(tx.logs.length, 1);
+                        const logEntered = tx.logs[0];
+                        assert.strictEqual(logEntered.event, "LogRoadEntered");
+                        assert.strictEqual(logEntered.args.vehicle, vehicle1);
+                        assert.strictEqual(logEntered.args.entryBooth, booth1);
+                        assert.strictEqual(logEntered.args.exitSecretHashed, hashed0);
+                        assert.strictEqual(logEntered.args.depositedWeis.toNumber(), deposit1);
+                        // console.log(tx.receipt.gasUsed);
+                        return operator.getVehicleEntry(hashed0);
+                    })
+                    .then(info => {
+                        assert.strictEqual(info[0], vehicle1);
+                        assert.strictEqual(info[1], booth1);
+                        assert.strictEqual(info[2].toNumber(), deposit1 * multiplier1);
+                        return web3.eth.getBalancePromise(operator.address);
+                    })
+                    .then(balance => assert.strictEqual(balance.toNumber(), deposit1 * multiplier1 ))
+		    .then(() => operator.reportExitRoad.call(secret0, { from: booth2 }))
+                    .then(result => assert.strictEqual(result.toNumber(), 1))
+                    .then(() => operator.reportExitRoad(secret0, { from: booth2 }))
+                    .then(tx => {
+                        assert.strictEqual(tx.receipt.logs.length, 1);
+                        assert.strictEqual(tx.logs.length, 1);
+                        const logExited = tx.logs[0];
+                        assert.strictEqual(logExited.event, "LogRoadExited");
+                        assert.strictEqual(logExited.args.exitBooth, booth2);
+                        assert.strictEqual(logExited.args.exitSecretHashed, hashed0);
+                        assert.strictEqual(logExited.args.finalFee.toNumber(), deposit2 * multiplier0);
+                        assert.strictEqual(logExited.args.refundWeis.toNumber(), 0);
+                        // console.log(tx.receipt.gasUsed);
+                    });
+	});
     });
 
 });
