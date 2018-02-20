@@ -24,6 +24,7 @@ contract('TollBoothOperator', function(accounts) {
     const secret0 = toBytes32(tmpSecret);
     const secret1 = toBytes32(tmpSecret + randomIntIn(1, 1000));
     let hashed0, hashed1;
+    let vehicleInitBal;
     before("should prepare", function() {
         assert.isAtLeast(accounts.length, 8);
         owner0 = accounts[0];
@@ -81,7 +82,21 @@ contract('TollBoothOperator', function(accounts) {
                         assert.strictEqual(info[2].toNumber(), deposit * multiplier1);
                         return web3.eth.getBalancePromise(operator.address);
                     })
-                    .then(balance => assert.strictEqual(balance.toNumber(), deposit * multiplier1 ));
+                    .then(balance => assert.strictEqual(balance.toNumber(), deposit * multiplier1 ))
+		    .then(() => operator.reportExitRoad.call(secret0, { from: booth2 }))
+                    .then(result => assert.strictEqual(result.toNumber(), 1))
+                    .then(() => operator.reportExitRoad(secret0, { from: booth2 }))
+                    .then(tx => {
+                        assert.strictEqual(tx.receipt.logs.length, 1);
+                        assert.strictEqual(tx.logs.length, 1);
+                        const logExited = tx.logs[0];
+                        assert.strictEqual(logExited.event, "LogRoadExited");
+                        assert.strictEqual(logExited.args.exitBooth, booth2);
+                        assert.strictEqual(logExited.args.exitSecretHashed, hashed0);
+                        assert.strictEqual(logExited.args.finalFee.toNumber(), deposit * multiplier0);
+                        assert.strictEqual(logExited.args.refundWeis.toNumber(), 0);
+                        // console.log(tx.receipt.gasUsed);
+                    });
 	});
 
     });
