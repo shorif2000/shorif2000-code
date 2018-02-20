@@ -1,6 +1,5 @@
 pragma solidity ^0.4.13;
 
-import './/Owned.sol';
 import './TollBoothHolder.sol';
 import './interfaces/RoutePriceHolderI.sol';
 

@@ -1,6 +1,5 @@
 pragma solidity ^0.4.13;
 
-import './Owned.sol';
 import './interfaces/RegulatorI.sol';
 import './TollBoothOperator.sol';
 
