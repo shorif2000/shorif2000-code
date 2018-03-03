@@ -10,7 +10,7 @@ if (typeof web3.eth.getAccountsPromise === "undefined") {
 const Regulator = artifacts.require("./Regulator.sol");
 const TollBoothOperator = artifacts.require("./TollBoothOperator.sol");
 contract('TollBoothOperator', function(accounts) {
-    let owner0, owner1,
+    let owner0, owner1, anyone,
         booth1, booth2, 
         vehicle1, vehicle2, 
         regulator, operator;
@@ -31,6 +31,7 @@ contract('TollBoothOperator', function(accounts) {
         assert.isAtLeast(accounts.length, 8);
         owner0 = accounts[0];
         owner1 = accounts[1];
+        anyone = accounts[4];
         booth1 = accounts[2];
         booth2 = accounts[3];
         vehicle1 = accounts[5];
@@ -542,10 +543,10 @@ contract('TollBoothOperator', function(accounts) {
 					assert.strictEqual(info.hashed1[2].toNumber(), 0);
 					assert.strictEqual(info.pendingCount01.toNumber(), 1);
 
-					return operator.reportExitRoad.call(secret2, { from: booth2 });
+					return operator.clearSomePendingPayments.call(booth1, booth2, 1, {from: anyone});
 				})
-				.then(result => assert.strictEqual(result.toNumber(), 1))
-				.then(() => operator.reportExitRoad(secret2, { from: booth2 }))
+				.then(result => assert.strictEqual(result, true))
+				.then(() => operator.clearSomePendingPayments(booth1, booth2, 1, {from: anyone}))
 				.then(tx => {
 					assert.strictEqual(tx.receipt.logs.length, 1);
 					assert.strictEqual(tx.logs.length, 1);
