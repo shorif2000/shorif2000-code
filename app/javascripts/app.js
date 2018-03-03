@@ -1,102 +1,67 @@
-// Import the page's CSS. Webpack will know what to do with it.
-import "../stylesheets/app.css";
+import React from 'react';
+import Promise from 'bluebird';
+import getWeb3 from './utils/getWeb3';
+import '../stylesheets/app.css';
 
-// Import libraries we need.
-import { default as Web3} from 'web3';
-import { default as contract } from 'truffle-contract'
+class App extends React.Component {
+	constructor(props) {
+		super(props)
 
-// Import our contract artifacts and turn them into usable abstractions.
-import metacoin_artifacts from '../../build/contracts/MetaCoin.json'
+		this.state = {
+			web3: null
+		}
+	}
 
-// MetaCoin is our usable abstraction, which we'll use through the code below.
-var MetaCoin = contract(metacoin_artifacts);
+	instantiateContract = () => {
+    	const truffleContract = require('truffle-contract');
+        const regulatorJson = require("./contracts/Regulator.json");
+    	const Regulator = truffleContract(regulatorJson);
+    	Regulator.setProvider(this.state.web3.currentProvider);
 
-// The following code is simple to show off interacting with your contracts.
-// As your needs grow you will likely need to change its form and structure.
-// For application bootstrapping, check out window.addEventListener below.
-var accounts;
-var account;
+        // TODO: build UI to load Regulator at address
+        Regulator.at('0x061fe979d112926352c13d01ca66bcebf685d2df').then((instance) => {
+            const regulatorInstance = instance;
+			Promise.promisifyAll(regulatorInstance, { suffix: "Promise"});
+            console.log(regulatorInstance);
 
-window.App = {
-  start: function() {
-    var self = this;
+			regulatorInstance.getOwner()
+			.then(owner => {
+				console.log('owner', owner);
+			});
+        });
+	}
 
-    // Bootstrap the MetaCoin abstraction for Use.
-    MetaCoin.setProvider(web3.currentProvider);
+	componentWillMount() {
+		getWeb3
+		.then(results => {
+            let web3 = results.web3;
 
-    // Get the initial account balance so it can be displayed.
-    web3.eth.getAccounts(function(err, accs) {
-      if (err != null) {
-        alert("There was an error fetching your accounts.");
-        return;
-      }
+            Promise.promisifyAll(web3.eth, { suffix: "Promise"});
+            Promise.promisifyAll(web3.version, { suffix: "Promise"});
 
-      if (accs.length == 0) {
-        alert("Couldn't get any accounts! Make sure your Ethereum client is configured correctly.");
-        return;
-      }
+		    this.setState({
+			    web3: web3
+			})
 
-      accounts = accs;
-      account = accounts[0];
+			this.instantiateContract();
+		})
+		.catch(() => {
+			console.log('Error finding web3.')
+		})
+	}
 
-      self.refreshBalance();
-    });
-  },
+	render() {
+		return (
+            <div className="App">
+				<header className="App-header">
+				    <h1 className="App-title">B9Lab Final Exam</h1>
+				</header>
+				<p className="App-body">
+                    -
+				</p>
+            </div>
+        );
+	}
+}
 
-  setStatus: function(message) {
-    var status = document.getElementById("status");
-    status.innerHTML = message;
-  },
-
-  refreshBalance: function() {
-    var self = this;
-
-    var meta;
-    MetaCoin.deployed().then(function(instance) {
-      meta = instance;
-      return meta.getBalance.call(account, {from: account});
-    }).then(function(value) {
-      var balance_element = document.getElementById("balance");
-      balance_element.innerHTML = value.valueOf();
-    }).catch(function(e) {
-      console.log(e);
-      self.setStatus("Error getting balance; see log.");
-    });
-  },
-
-  sendCoin: function() {
-    var self = this;
-
-    var amount = parseInt(document.getElementById("amount").value);
-    var receiver = document.getElementById("receiver").value;
-
-    this.setStatus("Initiating transaction... (please wait)");
-
-    var meta;
-    MetaCoin.deployed().then(function(instance) {
-      meta = instance;
-      return meta.sendCoin(receiver, amount, {from: account});
-    }).then(function() {
-      self.setStatus("Transaction complete!");
-      self.refreshBalance();
-    }).catch(function(e) {
-      console.log(e);
-      self.setStatus("Error sending coin; see log.");
-    });
-  }
-};
-
-window.addEventListener('load', function() {
-  // Checking if Web3 has been injected by the browser (Mist/MetaMask)
-  if (typeof web3 !== 'undefined') {
-    console.warn("Using web3 detected from external source. If you find that your accounts don't appear or you have 0 MetaCoin, ensure you've configured that source properly. If using MetaMask, see the following link. Feel free to delete this warning. :) http://truffleframework.com/tutorials/truffle-and-metamask")
-    // Use Mist/MetaMask's provider
-    window.web3 = new Web3(web3.currentProvider);
-  } else {
-    console.warn("No web3 detected. Falling back to http://localhost:8545. You should remove this fallback when you deploy live, as it's inherently insecure. Consider switching to Metamask for development. More info here: http://truffleframework.com/tutorials/truffle-and-metamask");
-    // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-    window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-  }
-
-  App.start();
-});
+export default App;

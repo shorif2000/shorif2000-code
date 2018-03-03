@@ -23,12 +23,13 @@ module.exports = {
     loaders: [
       { test: /\.json$/, use: 'json-loader' },
       {
-        test: /\.js$/,
+        //test: /\.js$/,
+        test: /\.js[x]?$/,
         exclude: /(node_modules|bower_components)/,
         loader: 'babel-loader',
         query: {
-          presets: ['es2015'],
-          plugins: ['transform-runtime']
+          presets: ['es2015', 'es2016', 'es2017', 'latest', 'stage-0', 'react'],
+          plugins: [ 'transform-runtime', 'transform-regenerator' ]
         }
       }
     ]
