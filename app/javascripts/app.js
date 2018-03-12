@@ -19,7 +19,7 @@ class App extends React.Component {
     	Regulator.setProvider(this.state.web3.currentProvider);
 
         // TODO: build UI to load Regulator at address
-        Regulator.at('0x061fe979d112926352c13d01ca66bcebf685d2df').then((instance) => {
+        Regulator.at('0x1a2ba2b1d2777ac7ba497a4dc58019b9569aa630').then((instance) => {
             const regulatorInstance = instance;
 			Promise.promisifyAll(regulatorInstance, { suffix: "Promise"});
             console.log(regulatorInstance);
@@ -35,7 +35,7 @@ class App extends React.Component {
 		getWeb3
 		.then(results => {
             let web3 = results.web3;
-
+console.log(web3);
             Promise.promisifyAll(web3.eth, { suffix: "Promise"});
             Promise.promisifyAll(web3.version, { suffix: "Promise"});
 

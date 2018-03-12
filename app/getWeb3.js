@@ -18,7 +18,7 @@ let getWeb3 = new Promise(function(resolve, reject) {
                 resolve(results);
             } else {
                 // Use local connection
-                var provider = new Web3.providers.HttpProvider('http://127.0.0.1:8545')
+                var provider = new Web3.providers.HttpProvider(window.location.protocol + '//' + window.location.hostname+':8545')
 
                 web3 = new Web3(provider);
 

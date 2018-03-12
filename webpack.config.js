@@ -55,11 +55,11 @@ module.exports = {
             inject: true,
             hash: true // disable caching
         }),
-        new webpack.DefinePlugin({
+    /*    new webpack.DefinePlugin({
             'process.env': {
                 'NODE_ENV': JSON.stringify('production')
             }
-        }),
+        }),*/
         new webpack.optimize.UglifyJsPlugin({
             minimize: true,
             warnings: false,
