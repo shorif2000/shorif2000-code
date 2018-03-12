@@ -1,6 +1,6 @@
 import React from 'react';
 import Promise from 'bluebird';
-import getWeb3 from './utils/getWeb3';
+import getWeb3 from '../getWeb3';
 import '../stylesheets/app.css';
 
 class App extends React.Component {
@@ -14,7 +14,7 @@ class App extends React.Component {
 
 	instantiateContract = () => {
     	const truffleContract = require('truffle-contract');
-        const regulatorJson = require("./contracts/Regulator.json");
+        const regulatorJson = require("../contracts/Regulator.json");
     	const Regulator = truffleContract(regulatorJson);
     	Regulator.setProvider(this.state.web3.currentProvider);
 
