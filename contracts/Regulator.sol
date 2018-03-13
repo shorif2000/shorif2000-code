@@ -8,7 +8,7 @@ contract Regulator is Owned, RegulatorI {
     mapping (address => bool ) private mTollBoothOperators;
     mapping (address => uint) private mVehicle;
     
-	function Regulator()
+	function Regulator() public
 	{
 	}
 	
