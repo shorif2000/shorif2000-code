@@ -9,7 +9,8 @@ if (typeof web3.eth.getAccountsPromise === "undefined") {
 }
 const Regulator = artifacts.require("./Regulator.sol");
 const TollBoothOperator = artifacts.require("./TollBoothOperator.sol");
-contract('TollBoothOperator', function(accounts) {
+
+contract('Scenarios', function(accounts) {
     let owner0, owner1, anyone,
         booth1, booth2, 
         vehicle1, vehicle2, 
