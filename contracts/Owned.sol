@@ -12,31 +12,14 @@ contract Owned is OwnedI {
 	    currentOwner = msg.sender;
 	}
 	
-	/*
-	 * @dev rolls back the transaction if the transaction sender is not the owner
-	 */
 	modifier fromOwner() 
 	{
 		require(msg.sender == currentOwner);
 		_;
 	}
-	
-	/**
-     * Event emitted when a new owner has been set.
-     * @param previousOwner The previous owner, who happened to effect the change.
-     * @param newOwner The new, and current, owner the contract.
-     */
+
     event LogOwnerSet(address indexed previousOwner, address indexed newOwner);
-    
-    /**
-     * Sets the new owner for this contract.
-     *     It should roll back if the caller is not the current owner.
-     *     It should roll back if the argument is the current owner.
-     *     It should roll back if the argument is a 0 address.
-     * @param newOwner The new owner of the contract
-     * @return Whether the action was successful.
-     * Emits LogOwnerSet.
-     */
+
     function setOwner(address newOwner)
         public
         fromOwner
@@ -49,10 +32,7 @@ contract Owned is OwnedI {
         LogOwnerSet(owner,newOwner);
         return true;
     }
-    
-    /**
-     * @return The owner of this contract.
-     */
+
     function getOwner() 
         public
         constant
