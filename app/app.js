@@ -33,9 +33,9 @@ class App extends React.Component {
     render() {
 
         return (
-            <div className="App">
-                <header className="App-header">
-                    <h1 className="App-title">B9Lab Final Exam</h1>
+            <div className="container-fluid">
+                <header className="text-center">
+                    <h1 className="">B9Lab Final Exam</h1>
                 </header>
                 <Regulator web3={this.state.web3} />
             </div>

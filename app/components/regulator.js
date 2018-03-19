@@ -78,11 +78,11 @@ class Regulator extends Component {
                 {formRErrors.map(error => (
                     <p key={error}>Error: {error}</p>
                 ))}
-                <div className="form-group mb-2">
-                    <label htmlFor="regulator_address" className="sr-only">Regulator Address</label>
+                <div className="form-group">
+                    <label htmlFor="regulator_address" className="control-label">Regulator Address</label>
                     <input type="text" readOnly={isEnabled} className="form-control" id="regulator_address" placeholder="Regulator Address" value={this.state.regulator_address} onChange={this.handleChange}/>
                 </div>
-                <button type="submit" disabled={isEnabled} className="btn btn-primary mb-2">Confirm</button>
+                <button type="submit" disabled={isEnabled} className="btn btn-primary">Confirm</button>
                 </form>
                 </div>
                 {vehicle}
