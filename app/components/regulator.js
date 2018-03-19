@@ -17,6 +17,11 @@ class Regulator extends Component {
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.instantiateContract = this.instantiateContract.bind(this);
+        this.passDataBack = this.passDataBack.bind(this);
+    }
+
+    passDataBack(){
+        this.props.passDataBack(this.props.accounts);
     }
 
     instantiateContract = (regulator_address) => {
@@ -68,7 +73,7 @@ class Regulator extends Component {
         console.log(this);
         let vehicle = '';
         if(isEnabled){
-            vehicle = <Vehicle regulator={regulator} owner={owner} web3={this.props.web3} />;
+            vehicle = <Vehicle regulator={regulator} owner={owner} web3={this.props.web3} accounts={this.props.accounts} passDataBack={this.props.passDataBack} />;
         }
 
         return (

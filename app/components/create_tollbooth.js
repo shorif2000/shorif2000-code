@@ -1,29 +1,29 @@
 import React, { Component } from 'react';
 
-class Vehicle extends Component {
+class CreateTollbooth extends Component {
 
     constructor(props) {
         super(props);
         this.handleChangeAddress = this.handleChangeAddress.bind(this);
         this.handleChangeVehicle = this.handleChangeVehicle.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
-        this.passDataBack = this.passDataBack.bind(this);
         this.state = {
             vehicleTypes : [{id: 1, type: 'motorbike'}, {id:2,type:'car'}, {id: 3, type: 'lorry'}],
             valueAddress: '',
             valueVehicle: '1',
             vehicles: [],
+            accounts: []
         }
-        this.accounts = [];
-    }
-
-    passDataBack = () => {
-        this.props.passDataBack(this.accounts);
     }
 
     componentWillMount(){
-        this.accounts = this.props.accounts;
-        this.setState({valueAddress: this.props.accounts[0]});
+        let length = this.props.web3.eth.accounts.length; 
+        let accounts = [];
+        for(let i = 2; i < length; i++){
+            accounts.push(this.props.web3.eth.accounts[i]);
+        }
+
+        this.setState({accounts, valueAddress: accounts[0]});
     }
 
     handleChangeAddress(event){
@@ -39,14 +39,14 @@ class Vehicle extends Component {
         let regulator = this.props.regulator;
         let owner = this.props.owner;
         let self = this;
+        console.log(this.state.valueAddress + ' : '  + this.state.valueVehicle);
         regulator.setVehicleType(this.state.valueAddress, this.state.valueVehicle, { from : owner })
         .then( tx => {
             console.log(tx);
-            self.accounts = self.accounts.filter(function(e) { return e !== self.state.valueAddress });
-            self.passDataBack();
-            let vehicles = self.state.vehicles;
+            let accounts = self.state.accounts.filter(function(e) { return e !== self.state.valueAddress });
+            let vehicles = [];
             vehicles.push({address: self.state.valueAddress, type: self.state.valueVehicle});
-            self.setState({vehicles, valueAddress: self.accounts[0]});
+            self.setState({accounts, vehicles, valueAddress: accounts[0]});
         });    
         
     }
@@ -58,7 +58,7 @@ class Vehicle extends Component {
     }
 
     render(){
-        let options = this.accounts.map((option, index) => (
+        let options = this.state.accounts.map((option, index) => (
             <option key={option} value={option}>
                 {option}
             </option>
@@ -108,4 +108,4 @@ class Vehicle extends Component {
     }
 }
 
-export default Vehicle;
+export default CreateTollbooth;
