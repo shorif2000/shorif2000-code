@@ -72,7 +72,7 @@ class Vehicle extends Component {
     
         console.log(this);
         return(
-            <div className="row-fluid top-buffer">
+            <div className="row top-buffer">
                 <h2>Vehicle List</h2>
                 <div className="col-xs-10 col-sm-3 col-md-4">
                 <div className="row-fluid">

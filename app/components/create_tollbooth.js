@@ -36,6 +36,7 @@ class CreateTollboothOperator extends Component {
         event.preventDefault();
         const { regulator, owner } = this.props;
         let self = this;
+        console.log(owner);console.log(this.state.deposit);
         regulator.createNewOperator(owner, this.state.deposit, { from : owner })
         .then( tx => {
             console.log(tx);
@@ -63,7 +64,7 @@ class CreateTollboothOperator extends Component {
         ));
 
         return(
-            <div className="row-fluid top-buffer">
+            <div className="row top-buffer">
                 <h2>Operator List</h2>
                 <div className="col-xs-10 col-sm-3 col-md-4">
                 <div className="row-fluid">
