@@ -1,79 +1,70 @@
 import React, { Component } from 'react';
 
-class CreateTollbooth extends Component {
+class CreateTollboothOperator extends Component {
 
     constructor(props) {
         super(props);
         this.handleChangeAddress = this.handleChangeAddress.bind(this);
-        this.handleChangeVehicle = this.handleChangeVehicle.bind(this);
+        this.handleChangeDeposit = this.handleChangeDeposit.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.state = {
-            vehicleTypes : [{id: 1, type: 'motorbike'}, {id:2,type:'car'}, {id: 3, type: 'lorry'}],
             valueAddress: '',
-            valueVehicle: '1',
-            vehicles: [],
-            accounts: []
+            deposit: '',
+            operators: [],
         }
+        this.accounts = [];
+    }
+
+    passDataBack = () => {
+        this.props.passDataBack(this.accounts);
     }
 
     componentWillMount(){
-        let length = this.props.web3.eth.accounts.length; 
-        let accounts = [];
-        for(let i = 2; i < length; i++){
-            accounts.push(this.props.web3.eth.accounts[i]);
-        }
-
-        this.setState({accounts, valueAddress: accounts[0]});
+        this.accounts = this.props.accounts;
+        this.setState({valueAddress: this.accounts[0]});
     }
 
     handleChangeAddress(event){
         this.setState({valueAddress : event.target.value});
     }
 
-    handleChangeVehicle(event){
-        this.setState({valueVehicle : event.target.value});
+    handleChangeDeposit(event){
+        this.setState({deposit : event.target.value});
     }
 
     handleSubmit(event) {
         event.preventDefault();
-        let regulator = this.props.regulator;
-        let owner = this.props.owner;
+        const { regulator, owner } = this.props;
         let self = this;
-        console.log(this.state.valueAddress + ' : '  + this.state.valueVehicle);
-        regulator.setVehicleType(this.state.valueAddress, this.state.valueVehicle, { from : owner })
+        regulator.createNewOperator(owner, this.state.deposit, { from : owner })
         .then( tx => {
             console.log(tx);
-            let accounts = self.state.accounts.filter(function(e) { return e !== self.state.valueAddress });
-            let vehicles = [];
-            vehicles.push({address: self.state.valueAddress, type: self.state.valueVehicle});
-            self.setState({accounts, vehicles, valueAddress: accounts[0]});
+            let accounts = self.accounts.filter(function(e) { return e !== self.state.valueAddress });
+            self.passDataBack();
+            let operators = self.state.operators;
+            operators.push({address: self.state.valueAddress, deposit: self.state.deposit});
+            self.setState({operators, valueAddress: self.accounts[0]});
         });    
         
     }
 
     displayAssigned(){
         return (
-            <pre>{JSON.stringify(this.state.vehicles, null, 2) }</pre>
+            <pre>{JSON.stringify(this.state.operators, null, 2) }</pre>
         );
     }
 
     render(){
-        let options = this.state.accounts.map((option, index) => (
+        this.accounts = this.props.accounts;
+        let options = this.accounts.map((option, index) => (
             <option key={option} value={option}>
                 {option}
             </option>
         ));
 
-        let vehicleOptions = this.state.vehicleTypes.map((option, index) => (
-            <option key={option.id} value={option.id}>
-                {option.type}
-            </option>
-        ));
-    
-        console.log(this);
         return(
             <div className="row-fluid top-buffer">
-                <h2>Vehicle List</h2>
+                <h2>Operator List</h2>
                 <div className="col-xs-10 col-sm-3 col-md-4">
                 <div className="row-fluid">
                     <form onSubmit={this.handleSubmit} className="form-horizontal">
@@ -86,15 +77,13 @@ class CreateTollbooth extends Component {
                             </div>
                         </div>
                         <div className="form-group">
-                            <label className="control-label col-sm-2">Set as vehicle:</label>
+                            <label className="control-label col-sm-2">Deposit:</label>
                             <div className="col-sm-10">
-                            <select value={this.state.valueVehicle} onChange={this.handleChangeVehicle} name="vehicles" className="form-control form-control-inline">
-                            {vehicleOptions}
-                            </select>
+                                <input type="text" name="deposit" onChange={this.handleChangeDeposit} />
                             </div>
                         </div>
                         <div className="col-sm-offset-2 col-sm-10 ">
-                            <button type="submit" className="btn btn-isuccess">Add</button>
+                            <button type="submit" className="btn btn-success">Create</button>
                         </div>
                     </form>
                 </div>
@@ -108,4 +97,4 @@ class CreateTollbooth extends Component {
     }
 }
 
-export default CreateTollbooth;
+export default CreateTollboothOperator;

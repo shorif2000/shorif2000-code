@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Vehicle from './vehicle';
+import CreateTollboothOperator from './create_tollbooth';
 //var Accounts = require('web3-eth-accounts');
 
 let regulatorInstance;
@@ -72,8 +73,10 @@ class Regulator extends Component {
         const isEnabled = owner.length > 0;
         console.log(this);
         let vehicle = '';
+        let operator = '';
         if(isEnabled){
             vehicle = <Vehicle regulator={regulator} owner={owner} web3={this.props.web3} accounts={this.props.accounts} passDataBack={this.props.passDataBack} />;
+            operator = <CreateTollboothOperator regulator={regulator} owner={owner} web3={this.props.web3} accounts={this.props.accounts} passDataBack={this.props.passDataBack} />;
         }
 
         return (
@@ -91,6 +94,7 @@ class Regulator extends Component {
                 </form>
                 </div>
                 {vehicle}
+                {operator}
             </div>
         );
     }
