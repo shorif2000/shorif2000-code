@@ -3,7 +3,10 @@ import Promise from 'bluebird';
 import getWeb3 from './getWeb3';
 import 'react-bootstrap/dist/react-bootstrap';
 import './stylesheets/app.css';
+import { Router, Route, Switch, withRouter } from 'react-router';
+import Menu from './components/menu';
 import Regulator from './components/regulator';
+import TollboothOperator from './components/tollbooth_operator';
 
 class App extends React.Component {
     constructor(props) {
@@ -39,16 +42,28 @@ class App extends React.Component {
     }
 
     render() {
+        const Main = () => (
+            <main>
+                <Switch>
+                    <Route exact path="/" component={()=><Regulator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} />} />
+                    <Route exact path="/tollboothoperator" component={()=><TollboothOperator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} />} />
+                </Switch>
+            </main>
+        )
 
         return (
-            <div className="container-fluid">
-                <header className="text-center">
-                    <h1 className="">B9Lab Final Exam</h1>
-                </header>
-                <Regulator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} />
+
+            <div>
+                <Menu />
+                <div className="container-fluid">
+                    <header className="text-center">
+                        <h1 className="">B9Lab Final Exam</h1>
+                    </header>
+                    <Main/>
+                </div>
             </div>
         );
     }
 }
 
-export default App;
+export default withRouter((App));

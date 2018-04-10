@@ -47,6 +47,8 @@ class Vehicle extends Component {
             let vehicles = self.state.vehicles;
             vehicles.push({address: self.state.valueAddress, type: self.state.valueVehicle});
             self.setState({vehicles, valueAddress: self.accounts[0]});
+            console.log("vehicle set");
+            console.log(self);
         });    
         
     }

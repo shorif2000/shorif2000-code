@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import Vehicle from './vehicle';
 import CreateTollboothOperator from './create_tollbooth';
-//var Accounts = require('web3-eth-accounts');
 
 let regulatorInstance;
 
@@ -71,6 +70,7 @@ class Regulator extends Component {
         const { formRErrors } = this.state;
         const { regulator, owner } = this.state;
         const isEnabled = owner.length > 0;
+        console.log("regulator render")
         console.log(this);
         let vehicle = '';
         let operator = '';
