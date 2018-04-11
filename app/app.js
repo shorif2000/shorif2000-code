@@ -13,8 +13,10 @@ class App extends React.Component {
         super(props)        
             this.state = {
                 web3: null,
-                accounts: []
+                accounts: [],
+                showPage: 'page1'
             }
+            this.handleDisplayPage = this.handleDisplayPage.bind(this);
     }
 
     passDataBack = (data) => {
@@ -41,42 +43,26 @@ class App extends React.Component {
         })
     }
 
+    handleDisplayPage(e){
+        e.preventDefault();
+        const page = e.currentTarget.id;
+        this.setState({ showPage: page });
+    }
+
     render() {
-        const Main = () => (
-            <main>
-                <Switch>
-                    <Route
-                        exact
-                        path="/"
-                        render={({ match }) => (
-                            <Regulator
-                                web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack}
-                                {...props}
-                            />
-                        )}
-                    />
-                    <Route
-                        path="/tollboothoperator"
-                        render={({ match }) => (
-                            <TollboothOperator
-                                web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack}
-                                {...props}
-                            />
-                        )}
-                    />
-                </Switch>
-            </main>
-        )
 
         return (
 
             <div>
-                <Menu />
+                <Menu displaypage={this.handleDisplayPage}/>
                 <div className="container-fluid">
                     <header className="text-center">
                         <h1 className="">B9Lab Final Exam</h1>
                     </header>
-                    <Main/>
+                    { this.state.showPage == 'page1' ? <Regulator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack}  /> : null }
+                    { this.state.showPage == 'page2' ? <TollboothOperator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack}  /> : null }
+                    { this.state.showPage == 'page3' ? <Regulator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack}  /> : null }
+                    { this.state.showPage == 'page4' ? <Regulator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack}  /> : null }
                 </div>
             </div>
         );

@@ -1,13 +1,26 @@
 import React, { Component } from 'react';
 
 class TollboothOperator extends Component {
-    constructor(){
+    constructor(props){
         super(props);
         this.state = {
             tollboothoperator_address: '',
-            
+            formRErrors: []
         }
         this.handleChange = this.handleChange.bind(this);
+    }
+
+    componentDidCatch(error, errorInfo) {
+        // Catch errors in any components below and re-render with error message
+        this.setState({
+            formRErrors: error,
+            errorInfo: errorInfo
+        })
+        // You can also log error messages to an error reporting service here
+    }
+
+    handleSubmit(){
+
     }
 
     handleChange(event) {
@@ -15,6 +28,7 @@ class TollboothOperator extends Component {
     }
 
     render(){        
+        const { formRErrors } = this.state;
         return (
             <div className="container-fluid">
                 <div className="row-fluid">
