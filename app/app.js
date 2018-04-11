@@ -45,8 +45,25 @@ class App extends React.Component {
         const Main = () => (
             <main>
                 <Switch>
-                    <Route exact path="/" component={()=><Regulator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} />} />
-                    <Route exact path="/tollboothoperator" component={()=><TollboothOperator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} />} />
+                    <Route
+                        exact
+                        path="/"
+                        render={({ match }) => (
+                            <Regulator
+                                web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack}
+                                {...props}
+                            />
+                        )}
+                    />
+                    <Route
+                        path="/tollboothoperator"
+                        render={({ match }) => (
+                            <TollboothOperator
+                                web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack}
+                                {...props}
+                            />
+                        )}
+                    />
                 </Switch>
             </main>
         )
