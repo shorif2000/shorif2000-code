@@ -40,11 +40,9 @@ class CreateTollboothOperator extends Component {
         regulator.createNewOperator(this.state.valueAddress, this.state.deposit, { from : owner,gas:3000000 })
         .then( tx => {
             console.log(tx);
-            let accounts = self.accounts.filter(function(e) { return e !== self.state.valueAddress });
-            self.passDataBack();
-            let operators = self.state.operators;
-            operators.push({address: self.state.valueAddress, deposit: self.state.deposit});
-            self.setState({operators, valueAddress: self.accounts[0]});
+            let operators = [];
+            operators.push({owner: tx.logs[1].args.owner, address: tx.logs[1].args.newOperator, deposit: tx.logs[1].args.depositWeis.toNumber()});
+            self.setState({operators});
         });    
         
     }

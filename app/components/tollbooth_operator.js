@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
+import Tollbooth from './tollbooth';
 
-let tollBoothOperatorJson;
+let tollBoothOperatorInstance;
 
 class TollboothOperator extends Component {
     constructor(props){
@@ -12,6 +13,7 @@ class TollboothOperator extends Component {
             formRErrors: []
         }
         this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
         this.instantiateOperator = this.instantiateOperator.bind(this);
     }
 
@@ -26,10 +28,12 @@ class TollboothOperator extends Component {
 
     instantiateOperator = (tollboothoperator_address) => {
         const truffleContract = require('truffle-contract');
-        const tollBoothOperatorJson = artifacts.require("../contracts/TollBoothOperator.json");
+        const tollBoothOperatorJson = require("../contracts/TollBoothOperator.json");
         const TollBoothOperator = truffleContract(tollBoothOperatorJson);
         TollBoothOperator.setProvider(this.props.web3.currentProvider);
-        TollBoothOperator.setProvider.at(tollboothoperator_address).then((instance) => {
+
+        let self = this;
+        TollBoothOperator.at(tollboothoperator_address).then((instance) => {
             tollBoothOperatorInstance = instance;
             console.log(tollBoothOperatorInstance);
             return tollBoothOperatorInstance.getOwner();
@@ -39,7 +43,7 @@ class TollboothOperator extends Component {
             self.setState({owner, tollboothoperator : tollBoothOperatorInstance});
         })
         .catch( (error) => {
-            console.log('Error locating Regulator ' + error);
+            console.log('Error locating Tollbooth Operator ' + error);
             self.setState({formRErrors: ['Error locating Regulator ' + error]});
         });
     }
@@ -54,12 +58,15 @@ class TollboothOperator extends Component {
     }
 
     render(){        
+        console.log(this);
         const { formRErrors } = this.state;
         const { tollboothoperator, owner } = this.state;
         const isEnabled = owner.length > 0;
+        let tollbooth = '';
         if(isEnabled){
-            // insert form functions
+            tollbooth = <Tollbooth tollboothoperator={tollboothoperator} owner={owner} web3={this.props.web3} accounts={this.props.accounts} passDataBack={this.props.passDataBack} />
         }
+
         return (
             <div className="container-fluid">
                 <div className="row-fluid">
@@ -74,6 +81,7 @@ class TollboothOperator extends Component {
                 <button type="submit" className="btn btn-primary">Confirm</button>
                 </form>
                 </div>
+                {tollbooth}
             </div>
         );
     }
