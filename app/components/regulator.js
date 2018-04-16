@@ -18,10 +18,16 @@ class Regulator extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.instantiateContract = this.instantiateContract.bind(this);
         this.passDataBack = this.passDataBack.bind(this);
+        this.passRegulatorBack = this.passRegulatorBack.bind(this);
     }
 
     passDataBack(){
         this.props.passDataBack(this.props.accounts);
+    }
+
+    passRegulatorBack(){
+        const state = this.state;
+        this.props.passRegulatorBack({regulator: state});
     }
 
     instantiateContract = (regulator_address) => {
@@ -40,11 +46,15 @@ class Regulator extends Component {
         .then(owner => {
             console.log('owner', owner);
             self.setState({owner: owner, regulator: regulatorInstance});
+            self.passRegulatorBack;
         })
         .catch( (error) => {
             console.log('Error locating Regulator ' + error);
             self.setState({formRErrors: ['Error locating Regulator ' + error]});
         });
+    }
+    componentDidMount(){
+        console.log("componentDidMount")
     }
 
     componentDidCatch(error, errorInfo) {
@@ -58,6 +68,7 @@ class Regulator extends Component {
 
     handleChange(event) {
         this.setState({regulator_address: event.target.value});
+        this.passRegulatorBack;
     }
 
     handleSubmit(event) {

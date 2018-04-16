@@ -1,13 +1,18 @@
 import React, { Component } from 'react';
 
+let tollBoothOperatorJson;
+
 class TollboothOperator extends Component {
     constructor(props){
         super(props);
         this.state = {
             tollboothoperator_address: '',
+            owner: '',
+            tollboothoperator: '',
             formRErrors: []
         }
         this.handleChange = this.handleChange.bind(this);
+        this.instantiateOperator = this.instantiateOperator.bind(this);
     }
 
     componentDidCatch(error, errorInfo) {
@@ -19,8 +24,29 @@ class TollboothOperator extends Component {
         // You can also log error messages to an error reporting service here
     }
 
-    handleSubmit(){
+    instantiateOperator = (tollboothoperator_address) => {
+        const truffleContract = require('truffle-contract');
+        const tollBoothOperatorJson = artifacts.require("../contracts/TollBoothOperator.json");
+        const TollBoothOperator = truffleContract(tollBoothOperatorJson);
+        TollBoothOperator.setProvider(this.props.web3.currentProvider);
+        TollBoothOperator.setProvider.at(tollboothoperator_address).then((instance) => {
+            tollBoothOperatorInstance = instance;
+            console.log(tollBoothOperatorInstance);
+            return tollBoothOperatorInstance.getOwner();
+        })
+        .then(owner => {
+            console.log('owner', owner);
+            self.setState({owner, tollboothoperator : tollBoothOperatorInstance});
+        })
+        .catch( (error) => {
+            console.log('Error locating Regulator ' + error);
+            self.setState({formRErrors: ['Error locating Regulator ' + error]});
+        });
+    }
 
+    handleSubmit(event){
+        event.preventDefault();
+        this.instantiateOperator(this.state.tollboothoperator_address);
     }
 
     handleChange(event) {
@@ -29,6 +55,11 @@ class TollboothOperator extends Component {
 
     render(){        
         const { formRErrors } = this.state;
+        const { tollboothoperator, owner } = this.state;
+        const isEnabled = owner.length > 0;
+        if(isEnabled){
+            // insert form functions
+        }
         return (
             <div className="container-fluid">
                 <div className="row-fluid">
