@@ -9,7 +9,8 @@ class Tollbooth extends Component {
         this.passDataBack = this.passDataBack.bind(this);
         this.state = {
             tollbooths: [],
-            address: ''
+            address: '',
+            formRErrors: []
         }
         this.accounts = [];
     }
@@ -32,13 +33,28 @@ class Tollbooth extends Component {
         let tollboothoperator = this.props.tollboothoperator;
         let owner = this.props.owner;
         let self = this;
-        tollboothoperator.addTollBooth(this.state.address, { from : owner })
+        tollboothoperator.isTollBooth(this.state.address)
+        .then( isIndeed => {
+            if(!isIndeed){
+                return tollboothoperator.addTollBooth(this.state.address, { from : owner }) 
+            }
+            self.accounts = self.accounts.filter(function(e) { return e !== self.state.address });
+            self.passDataBack();
+            let tollbooths = self.state.tollbooths;
+            tollbooths.push({address: self.state.address});
+            self.setState({tollbooths, address : self.accounts[0]});
+            return Promise.reject('Tollbooth exists.') ;
+        })
         .then( tx => {
             self.accounts = self.accounts.filter(function(e) { return e !== self.state.address });
             self.passDataBack();
             let tollbooths = self.state.tollbooths;
             tollbooths.push({address: self.state.address});
-            self.setState({tollbooths});
+            self.setState({tollbooths, address : self.accounts[0]});
+        })
+        .catch( (error) => {
+            console.log(error);
+            self.setState({formRErrors: [error]});
         });    
         
     }
@@ -50,6 +66,9 @@ class Tollbooth extends Component {
     }
 
     render(){
+        console.log(this)
+        const { formRErrors } = this.state;
+
         let options = this.accounts.map((option, index) => (
             <option key={option} value={option}>
                 {option}
@@ -62,6 +81,9 @@ class Tollbooth extends Component {
                 <div className="col-xs-10 col-sm-3 col-md-4">
                 <div className="row-fluid">
                     <form onSubmit={this.handleSubmit} className="form-horizontal">
+                        {formRErrors.map(error => (
+                            <p key={error}>Error: {error}</p>
+                        ))}
                         <div className="form-group">
                             <label className="control-label col-sm-2">Available Addresses:</label>
                             <div className="col-sm-10">
