@@ -8,6 +8,7 @@ class Vehicle extends Component {
         this.handleChangeVehicle = this.handleChangeVehicle.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.passDataBack = this.passDataBack.bind(this);
+        this.passVehiclesBack = this.passVehiclesBack.bind(this);
         this.state = {
             vehicleTypes : [{id: 1, type: 'motorbike'}, {id:2,type:'car'}, {id: 3, type: 'lorry'}],
             valueAddress: '',
@@ -20,6 +21,12 @@ class Vehicle extends Component {
 
     passDataBack = () => {
         this.props.passDataBack(this.accounts);
+    }
+    
+    passVehiclesBack = (vehicles) => {
+        console.log("passVehiclesBack");
+        console.log(vehicles);
+        this.props.passVehiclesBack(vehicles);
     }
 
     componentWillMount(){
@@ -49,6 +56,7 @@ class Vehicle extends Component {
             self.passDataBack();
             let vehicles = self.state.vehicles;
             vehicles.push({address: self.state.valueAddress, type: vehicleType});
+            self.passVehiclesBack(vehicles);
             self.setState({vehicles, valueAddress: self.accounts[0]});
             return Promise.reject('This vehicle exists.') ;
         })
@@ -60,6 +68,7 @@ class Vehicle extends Component {
             self.passDataBack();
             let vehicles = self.state.vehicles;
             vehicles.push({address: self.state.valueAddress, type: self.state.valueVehicle});
+            self.passVehiclesBack(vehicles);
             self.setState({vehicles, valueAddress: self.accounts[0]});
         })
         .catch( (error) => {

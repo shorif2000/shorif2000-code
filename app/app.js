@@ -13,7 +13,8 @@ class App extends React.Component {
             this.state = {
                 web3: null,
                 accounts: [],
-                showPage: 'page1'
+                showPage: 'page1',
+                vehicles: []
             }
             this.handleDisplayPage = this.handleDisplayPage.bind(this);
     }
@@ -21,6 +22,13 @@ class App extends React.Component {
     passDataBack = (data) => {
         this.setState({
             accounts : data
+        });
+    }
+
+    passVehiclesBack = (data) => {
+        console.log("passVehiclesBack" , data);
+        this.setState({
+             vehicles : data
         });
     }
 
@@ -80,7 +88,7 @@ class App extends React.Component {
             style4 = 'block';
         }
 
-
+console.log(this.state.vehicles);
 
         return (
 
@@ -91,10 +99,10 @@ class App extends React.Component {
                         <h1 className="">B9Lab Final Exam</h1>
                     </header>
                     <div style={{display: style1}}>
-                        <Regulator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} passRegulatorBack={this.passRegulatorBack} /> 
+                        <Regulator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} passRegulatorBack={this.passRegulatorBack} passVehiclesBack={this.passVehiclesBack} /> 
                     </div>
                     <div style={{display: style2}}>
-                        <TollboothOperator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack}  /> 
+                        <TollboothOperator web3={this.state.web3} accounts={this.state.accounts} vehicles={this.state.vehicles} passDataBack={this.passDataBack} passVehiclesBack={this.passVehiclesBack} /> 
                     </div>
                     <div style={{display: style3}}>
                         <Regulator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack}  /> 

@@ -35,11 +35,18 @@ class TollboothOperator extends Component {
         let self = this;
         TollBoothOperator.at(tollboothoperator_address).then((instance) => {
             tollBoothOperatorInstance = instance;
-            console.log(tollBoothOperatorInstance);
             return tollBoothOperatorInstance.getOwner();
         })
         .then(owner => {
-            console.log('owner', owner);
+            self.props.web3.eth.filter({
+                address: tollboothoperator_address,
+                from: 1,
+                to: 'latest'
+            }).get(function (err, result) {
+                // callback code here
+                console.log(err);
+                console.log(result);
+            })
             self.setState({owner, tollboothoperator : tollBoothOperatorInstance});
         })
         .catch( (error) => {
@@ -58,13 +65,12 @@ class TollboothOperator extends Component {
     }
 
     render(){        
-        console.log(this);
         const { formRErrors } = this.state;
         const { tollboothoperator, owner } = this.state;
         const isEnabled = owner.length > 0;
         let tollbooth = '';
         if(isEnabled){
-            tollbooth = <Tollbooth tollboothoperator={tollboothoperator} owner={owner} web3={this.props.web3} accounts={this.props.accounts} passDataBack={this.props.passDataBack} />
+            tollbooth = <Tollbooth tollboothoperator={tollboothoperator} owner={owner} web3={this.props.web3} accounts={this.props.accounts} vehicles={this.props.vehicles} passDataBack={this.props.passDataBack} />
         }
 
         return (

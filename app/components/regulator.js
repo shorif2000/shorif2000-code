@@ -37,14 +37,20 @@ class Regulator extends Component {
         Regulator.setProvider(this.props.web3.currentProvider);
 
         let self = this;
-        console.log(regulator_address);
         Regulator.at(regulator_address).then((instance) => {
             regulatorInstance = instance;
-            console.log(regulatorInstance);
             return regulatorInstance.getOwner();
         })
         .then(owner => {
-            console.log('owner', owner);
+            self.props.web3.eth.filter({
+                address: regulator_address,
+                from: 0,
+                to: 'latest'
+            }).get(function (err, result) {
+                // callback code here
+                console.log(result);
+            })
+
             self.setState({owner: owner, regulator: regulatorInstance});
             self.passRegulatorBack;
         })
@@ -54,7 +60,6 @@ class Regulator extends Component {
         });
     }
     componentDidMount(){
-        console.log("componentDidMount")
     }
 
     componentDidCatch(error, errorInfo) {
@@ -81,12 +86,10 @@ class Regulator extends Component {
         const { formRErrors } = this.state;
         const { regulator, owner } = this.state;
         const isEnabled = owner.length > 0;
-        console.log("regulator render")
-        console.log(this);
         let vehicle = '';
         let operator = '';
         if(isEnabled){
-            vehicle = <Vehicle regulator={regulator} owner={owner} web3={this.props.web3} accounts={this.props.accounts} passDataBack={this.props.passDataBack} />;
+            vehicle = <Vehicle regulator={regulator} owner={owner} web3={this.props.web3} accounts={this.props.accounts} passDataBack={this.props.passDataBack} passVehiclesBack={this.props.passVehiclesBack}/>;
             operator = <CreateTollboothOperator regulator={regulator} owner={owner} web3={this.props.web3} accounts={this.props.accounts} passDataBack={this.props.passDataBack} />;
         }
 

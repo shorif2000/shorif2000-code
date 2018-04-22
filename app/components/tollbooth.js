@@ -6,20 +6,27 @@ class Tollbooth extends Component {
         super(props);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleSubmitSet = this.handleSubmitSet.bind(this);
+        this.handleSubmitMultiplier = this.handleSubmitMultiplier.bind(this);
         this.handleChangeAddress = this.handleChangeAddress.bind(this);
         this.handleChangeFrom = this.handleChangeFrom.bind(this);
         this.handleChangeTo = this.handleChangeTo.bind(this);
         this.handleChangePrice = this.handleChangePrice.bind(this);
+        this.handleChangeVehicle = this.handleChangeVehicle.bind(this);
+        this.handleChangeMultiplier = this.handleChangeMultiplier.bind(this);
         this.passDataBack = this.passDataBack.bind(this);
         this.state = {
             tollbooths: [],
             address: '',
             formErrors: [],
             formRErrors: [],
+            formMErrors :[],
             from: '',
             to: '',
             price:'',
-            baserouteprice: []
+            baserouteprice: [],
+            multiplied: [],
+            multiplier: '',
+            vehicle: '',
         }
         this.accounts = [];
     }
@@ -47,6 +54,14 @@ class Tollbooth extends Component {
 
     handleChangePrice(event){
         this.setState({price : event.target.value});
+    }
+
+    handleChangeVehicle(event){
+        this.setState({vehicle : event.target.value});
+    }
+
+    handleChangeMultiplier(event){
+        this.setState({multiplier : event.target.value});
     }
 
     handleSubmit(event) {
@@ -119,6 +134,44 @@ class Tollbooth extends Component {
 
     }
 
+    handleSubmitMultiplier(event) {
+        event.preventDefault();
+        let { price, from, to } = this.state;
+        price = parseInt(price);
+        if(isNaN(price) && (function(x) { return (x | 0) === x; })(parseFloat(price))){
+            alert("Price is not a number " + price);
+            return;
+        }
+        const { owner, tollboothoperator } = this.props;
+        let self = this;
+        console.log(this.state)
+        tollboothoperator.isTollBooth(from)
+        .then( isIndeed => {
+            if(!isIndeed){
+                return Promise.reject('Not a tollbooth.') ;
+            }
+            return tollboothoperator.isTollBooth(to)
+        })
+        .then( isIndeed => {
+            if(!isIndeed){
+                return Promise.reject('Not a tollbooth.') ;
+            }
+            return tollboothoperator.setRoutePrice(from, to, price, { from: owner })
+        })
+        .then( isSuccess => {
+            console.log(isSuccess);
+            if(!isSuccess){return Promise.reject('Failed to set route price.') ;}
+            let baserouteprice = self.state.baserouteprice;
+            baserouteprice.push({sender:owner,from:from,to:to,price:price});
+            self.setState({baserouteprice});
+        })
+        .catch( (error) => {
+            console.log(error);
+            self.setState({formRErrors: ["error has occured"]});
+
+        });
+
+    }
 
     displayAssigned(object){
         if(object.length > 0){
@@ -129,7 +182,9 @@ class Tollbooth extends Component {
     }
 
     render(){
-        const { formErrors, formRErrors, tollbooths } = this.state;
+        console.log(this);
+        const { formErrors, formRErrors, formMErrors, tollbooths } = this.state;
+        const { vehicles } = this.props;
 
         let options = this.accounts.map((option, index) => (
             <option key={option} value={option}>
@@ -143,6 +198,11 @@ class Tollbooth extends Component {
             </option>
         ));
 
+        let vehicles1 = vehicles.map((option, index) => (
+            <option key={option.address} value={option.address}>
+                {option.address}
+            </option>
+        ));
 
         return(
                 <div>
@@ -217,6 +277,42 @@ class Tollbooth extends Component {
                 </div>
                 </form>
             </div>
+
+
+            <div className="row top-buffer">
+                <h2>Set Multiplier</h2>
+                <form onSubmit={this.handleSubmitMultiplier} className="form-horizontal">
+                    {formMErrors.map(error => (
+                            <p key={error}>Error: {error}</p>
+                        ))}
+
+                <div className="form-group col-xs-6 col-md-3">
+                    <label className="control-label col-sm-2">Vehicle:</label>
+                    <div className="col-sm-10">
+                        <select value={this.state.vehicle} onChange={this.handleChangeVehicle} name="vehicle" className="form-control form-control-inline">
+                            <option key="" value="">
+                                -- Select vehicle --
+                            </option>
+                            {vehicles1}
+                        </select>
+                    </div>
+                </div>
+                <div className="form-group col-xs-6 col-md-3">
+                    <label className="control-label col-sm-2">multiplier:</label>
+                    <div className="col-sm-10">
+                        <input type="text" name="price" value={this.state.multiplier} onChange={this.handleChangeMultiplier} />
+                    </div>
+                </div>
+                <div className="col-xs-6 col-md-3">
+                    <h3>Assigned</h3>
+                    <div>{this.displayAssigned(this.state.multiplied)}</div>
+                </div>
+                <div className="row col-sm-offset-2 col-sm-10 ">
+                    <button type="submit" className="btn btn-success">Set</button>
+                </div>
+                </form>
+            </div>
+
             </div>
         );
     }
