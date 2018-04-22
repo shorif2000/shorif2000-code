@@ -50,6 +50,7 @@ contract RoutePriceHolder is TollBoothHolder, RoutePriceHolderI {
         require(isTollBooth(entryBooth));
         require(isTollBooth(exitBooth));
         require(entryBooth != exitBooth);
+        require(getRoutePrice(entryBooth,exitBooth) != priceWeis);
         mRoutePrice[entryBooth][exitBooth] = priceWeis;
         LogRoutePriceSet(msg.sender,entryBooth,exitBooth,priceWeis);
         return true;

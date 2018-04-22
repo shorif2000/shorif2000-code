@@ -3,7 +3,6 @@ import Promise from 'bluebird';
 import getWeb3 from './getWeb3';
 import 'react-bootstrap/dist/react-bootstrap';
 import './stylesheets/app.css';
-import { Router, Route, Switch, withRouter } from 'react-router';
 import Menu from './components/menu';
 import Regulator from './components/regulator';
 import TollboothOperator from './components/tollbooth_operator';
@@ -109,4 +108,4 @@ class App extends React.Component {
     }
 }
 
-export default withRouter((App));
+export default (App);

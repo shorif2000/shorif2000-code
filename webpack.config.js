@@ -61,7 +61,7 @@ module.exports = {
             }
         }),*/
         new webpack.optimize.UglifyJsPlugin({
-            minimize: false,
+            minimize: true,
             warnings: false,
             uglifyOptions: { compress: { unused: false } }
         }),
