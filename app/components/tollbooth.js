@@ -136,38 +136,25 @@ class Tollbooth extends Component {
 
     handleSubmitMultiplier(event) {
         event.preventDefault();
-        let { price, from, to } = this.state;
-        price = parseInt(price);
-        if(isNaN(price) && (function(x) { return (x | 0) === x; })(parseFloat(price))){
-            alert("Price is not a number " + price);
+        let { vehicle, multiplier, multiplied } = this.state;
+        multiplier = parseInt(multiplier);
+        if(isNaN(multiplier) && (function(x) { return (x | 0) === x; })(parseFloat(multiplier))){
+            alert("Price is not a number " + multiplier);
             return;
         }
         const { owner, tollboothoperator } = this.props;
         let self = this;
-        console.log(this.state)
-        tollboothoperator.isTollBooth(from)
-        .then( isIndeed => {
-            if(!isIndeed){
-                return Promise.reject('Not a tollbooth.') ;
-            }
-            return tollboothoperator.isTollBooth(to)
-        })
-        .then( isIndeed => {
-            if(!isIndeed){
-                return Promise.reject('Not a tollbooth.') ;
-            }
-            return tollboothoperator.setRoutePrice(from, to, price, { from: owner })
-        })
+        tollboothoperator.setMultiplier( vehicle, multiplier ,{from: owner})
         .then( isSuccess => {
-            console.log(isSuccess);
-            if(!isSuccess){return Promise.reject('Failed to set route price.') ;}
-            let baserouteprice = self.state.baserouteprice;
-            baserouteprice.push({sender:owner,from:from,to:to,price:price});
-            self.setState({baserouteprice});
+            if(!isSuccess){
+                return Promise.reject('Failed to set Multiplier for ' + vehicle) ;
+            }
+            multiplied.push({vehicle: vehicle, multiplier: multiplier});
+            self.setState({multiplied});
         })
         .catch( (error) => {
             console.log(error);
-            self.setState({formRErrors: ["error has occured"]});
+            self.setState({formMErrors: ["error has occured"]});
 
         });
 
@@ -300,7 +287,7 @@ class Tollbooth extends Component {
                 <div className="form-group col-xs-6 col-md-3">
                     <label className="control-label col-sm-2">multiplier:</label>
                     <div className="col-sm-10">
-                        <input type="text" name="price" value={this.state.multiplier} onChange={this.handleChangeMultiplier} />
+                        <input type="text" name="multiplier" value={this.state.multiplier} onChange={this.handleChangeMultiplier} />
                     </div>
                 </div>
                 <div className="col-xs-6 col-md-3">

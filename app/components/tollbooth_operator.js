@@ -40,7 +40,7 @@ class TollboothOperator extends Component {
         .then(owner => {
             self.props.web3.eth.filter({
                 address: tollboothoperator_address,
-                from: 1,
+                from: 0,
                 to: 'latest'
             }).get(function (err, result) {
                 // callback code here
