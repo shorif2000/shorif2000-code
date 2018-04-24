@@ -11,7 +11,12 @@ class Vehicles  extends Component {
             balance: null,
             formRErrors: [],
             vehicle_address: '',
-            display: 'none'
+            display: 'none',
+            amount: '',
+            secret: '',
+            formEErrors : [],
+            tollbooth: '',
+            select_tollbooths: null
         }
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -33,7 +38,7 @@ class Vehicles  extends Component {
         const regulator = this.props.regulator.regulator;
         const tollboothoperator = this.props.tollboothoperator.tollboothoperator;
         if(regulator !== undefined){
-            if(tollboothoperator !== undefined){
+        if(tollboothoperator !== undefined){
             if(!this.props.web3.isAddress(vehicle_address)){
                 this.setState({formRErrors:['Invalid address']});
                 return;
@@ -46,37 +51,35 @@ class Vehicles  extends Component {
                 }
                 
                 return self.props.web3.eth.getBalance(vehicle_address);
-/* => {
-      if (err) {
-        console.log(`getBalance error: ${err}`);
-        self.setState({formRErrors:['get balance erro ' + err]});
-      } else {
-        balance = bal;
-        console.log(`${self.props.web3.fromWei(balance, "ether")}`);
-
-      }
-    });
-                var balance = self.props.web3.eth.getBalance(vehicle_address);
-                console.log(balance.toNumber());
-                balance = self.props.web3.toDecimal(balance);
-                console.log(balance);
-*/
             })
             .then( bal => {
                 let balance = self.props.web3.fromWei(bal.toNumber(), "ether");
-                self.setState({balance, display: 'block'});  
+                tollboothoperator.LogTollBoothAdded( {}, {fromBlock: 0,to:'latest'})
+                .get(function(error,logEvent) {
+                  if(error)
+                  {
+                     console.error(error)
+                   } else {
+                     console.log(logEvent);
+                     const tifOptions = Object.keys(logEvent).map(key => 
+                           <option value={logEvent[key].args.tollbooth}>{tifs[key].args.tollbooth}</option>
+                     )
+                     self.setState({balance, display: 'block'},select_tollbooth: tifOptions);
+                   }
+                });
             })
             .catch( (error) => {
                 console.log(error)
                 self.setState({formRErrors: 'error has occured'});
             });
 
-            }else{
-                this.setState({formRErrors:['Load tollbooth operator before use']});
-            }
+        }else{
+            this.setState({formRErrors:['Load tollbooth operator before use']});
+        }
         }else{
             this.setState({formRErrors:['Load regulator before use']});
         }
+
     }
     componentDidMount(){
     }
@@ -91,7 +94,7 @@ class Vehicles  extends Component {
     }
 
     handleChange(event) {
-        this.setState({vehicle_address: event.target.value});
+        this.setState({[event.target.name]: event.target.value});
     }
 
     handleSubmit(event) {
@@ -100,9 +103,14 @@ class Vehicles  extends Component {
         this.instantiateContract(this.state.vehicle_address);
     }
 
+    handleChangeAmount(event) {
+        console.log({[event.target.name]: event.target.value});
+        this.setState({[event.target.name]: event.target.value});
+    }
+
     render() {
         console.log(this);
-        const { formRErrors } = this.state;
+        const { formRErrors, formEErrors, select_tollbooth, tollbooth, balance, vehicle_address, display, amount, secret } = this.state;
 
         return (
             <div className="container-fluid">
@@ -113,16 +121,41 @@ class Vehicles  extends Component {
                 ))}
                 <div className="form-group">
                     <label htmlFor="vehicle_address" className="control-label">Vehicle Address</label>
-                    <input type="text" className="form-control" id="vehicle_address" placeholder="Vehicle Address" value={this.state.vehicle_address} onChange={this.handleChange}/>
+                    <input type="text" className="form-control" name="vehicle_address" placeholder="Vehicle Address" value={vehicle_address} onChange={this.handleChange}/>
                 </div>
                 <button type="submit"  className="btn btn-primary">Confirm</button>
                 </form>
                 </div>
-                <div className="row top-buffer" style={{display: this.state.display}}>
-                    <div className="col-xs-2">Balance: </div>
-                    <div className="col-xs-10">{this.state.balance}</div>
-                </div>
-                <div className="row top-buffer">
+                <div className="row top-buffer" style={{display: display}}>
+                    <div className="row top-buffer">
+                        <div className="col-xs-2">Balance: </div>
+                        <div className="col-xs-10">{balance}</div>
+                    </div>
+                    <div className="row top-buffer">
+                        <form className="form-inline" onSubmit={this.handleSubmitEnter}>
+                        {formEErrors.map(error => (
+                            <p key={error}>Error: {error}</p>
+                        ))}
+                        <div className="form-group">
+                            <label htmlFor="amount" className="control-label">Amount to deposit</label>
+                            <input type="text" className="form-control" name="amount" placeholder="Amoutn to deposit" value={amount} onChange={this.handleChange}/>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="secret" className="control-label">Secret</label>
+                            <input type="text" className="form-control" name="secret" placeholder="Secret" value={secret} onChange={this.handleChange}/>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="tollbooth" className="control-label">Tollbooth</label>
+                            <select value={tollbooth} onChange={this.handleChange} name="tollbooth" className="form-control form-control-inline">
+                                <option key="" value="">
+                                    -- Select tollbooth --
+                                </option>
+                                {select_tollbooth}
+                        </select> 
+                        </div>
+                        <button type="submit"  className="btn btn-primary">Confirm</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         );
