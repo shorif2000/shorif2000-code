@@ -30,6 +30,10 @@ class Vehicles  extends Component {
     instantiateContract = (vehicle_address) => {
         const { regulator, owner } = this.props.regulator;
         if(regulator !== undefined){
+            if(!this.props.web333.isAddress(vehicle_address)){
+                this.setState({formRErrors:['Invalid address']});
+                return;
+            }
             let self = this;
             regulator.getVehicleType(vehicle_address)
             .then( vehicleType => {

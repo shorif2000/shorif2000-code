@@ -32,6 +32,10 @@ class Regulator extends Component {
     }
 
     instantiateContract = (regulator_address) => {
+        if(!this.props.web3.isAddress(regulator_address)){
+            this.setState({formRErrors: ['Not valid address']});
+            return;
+        }
         const truffleContract = require('truffle-contract');
         const regulatorJson = require("../contracts/Regulator.json");
         const Regulator = truffleContract(regulatorJson);

@@ -27,6 +27,11 @@ class TollboothOperator extends Component {
     }
 
     instantiateOperator = (tollboothoperator_address) => {
+        if(!this.props.web3.isAddress(tollboothoperator_address)){
+            this.setState({formRErrors: ['Not valid address']});
+            return;
+        }
+
         const truffleContract = require('truffle-contract');
         const tollBoothOperatorJson = require("../contracts/TollBoothOperator.json");
         const TollBoothOperator = truffleContract(tollBoothOperatorJson);
