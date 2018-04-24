@@ -38,15 +38,6 @@ class TollboothOperator extends Component {
             return tollBoothOperatorInstance.getOwner();
         })
         .then(owner => {
-            self.props.web3.eth.filter({
-                address: tollboothoperator_address,
-                from: 0,
-                to: 'latest'
-            }).get(function (err, result) {
-                // callback code here
-                console.log(err);
-                console.log(result);
-            })
             self.setState({owner, tollboothoperator : tollBoothOperatorInstance});
         })
         .catch( (error) => {

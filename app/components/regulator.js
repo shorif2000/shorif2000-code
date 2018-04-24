@@ -3,6 +3,7 @@ import Vehicle from './vehicle';
 import CreateTollboothOperator from './create_tollbooth';
 
 let regulatorInstance;
+let watchRegulator;
 
 class Regulator extends Component {
 
@@ -42,20 +43,10 @@ class Regulator extends Component {
             return regulatorInstance.getOwner();
         })
         .then(owner => {
-            self.props.web3.eth.filter({
-                address: regulator_address,
-                from: 0,
-                to: 'latest'
-            }).get(function (err, result) {
-                // callback code here
-                console.log(result);
-            })
-
             self.setState({owner: owner, regulator: regulatorInstance});
-            self.passRegulatorBack;
+            self.passRegulatorBack();
         })
         .catch( (error) => {
-            console.log('Error locating Regulator ' + error);
             self.setState({formRErrors: ['Error locating Regulator ' + error]});
         });
     }

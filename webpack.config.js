@@ -63,7 +63,8 @@ module.exports = {
         new webpack.optimize.UglifyJsPlugin({
             minimize: true,
             warnings: false,
-            uglifyOptions: { compress: { unused: false } }
+            uglifyOptions: { compress: { unused: false } },
+            compress: false
         }),
         new ExtractTextPlugin("[name].bundle.css")
     ]

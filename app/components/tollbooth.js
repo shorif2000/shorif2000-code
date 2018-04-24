@@ -105,7 +105,6 @@ class Tollbooth extends Component {
         }
         const { owner, tollboothoperator } = this.props;
         let self = this;
-        console.log(this.state)
         tollboothoperator.isTollBooth(from)
         .then( isIndeed => {
             if(!isIndeed){
@@ -120,7 +119,6 @@ class Tollbooth extends Component {
             return tollboothoperator.setRoutePrice(from, to, price, { from: owner })
         })
         .then( isSuccess => { 
-            console.log(isSuccess);
             if(!isSuccess){return Promise.reject('Failed to set route price.') ;} 
             let baserouteprice = self.state.baserouteprice;
             baserouteprice.push({sender:owner,from:from,to:to,price:price});
@@ -169,7 +167,6 @@ class Tollbooth extends Component {
     }
 
     render(){
-        console.log(this);
         const { formErrors, formRErrors, formMErrors, tollbooths } = this.state;
         const { vehicles } = this.props;
 

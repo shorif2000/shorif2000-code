@@ -6,7 +6,7 @@ import './stylesheets/app.css';
 import Menu from './components/menu';
 import Regulator from './components/regulator';
 import TollboothOperator from './components/tollbooth_operator';
-
+import Vehicles from './components/vehicles';
 class App extends React.Component {
     constructor(props) {
         super(props)        
@@ -14,7 +14,9 @@ class App extends React.Component {
                 web3: null,
                 accounts: [],
                 showPage: 'page1',
-                vehicles: []
+                vehicles: [],
+                regulator : {},
+                watchRegulator: {}
             }
             this.handleDisplayPage = this.handleDisplayPage.bind(this);
     }
@@ -26,15 +28,17 @@ class App extends React.Component {
     }
 
     passVehiclesBack = (data) => {
-        console.log("passVehiclesBack" , data);
         this.setState({
              vehicles : data
         });
     }
 
     passRegulatorBack = (data) => {
-        console.log(data);
-        console.log("passRegulatorBack");
+        let watchRegulator = data.regulator.regulator.allEvents().watch((error, result) => {
+            console.log(error);
+            console.log(result);
+        });
+        this.setState({regulator: data.regulator, watchRegulator});
     }
 
     componentWillMount() {
@@ -88,7 +92,6 @@ class App extends React.Component {
             style4 = 'block';
         }
 
-console.log(this.state.vehicles);
 
         return (
 
@@ -102,13 +105,12 @@ console.log(this.state.vehicles);
                         <Regulator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} passRegulatorBack={this.passRegulatorBack} passVehiclesBack={this.passVehiclesBack} /> 
                     </div>
                     <div style={{display: style2}}>
-                        <TollboothOperator web3={this.state.web3} accounts={this.state.accounts} vehicles={this.state.vehicles} passDataBack={this.passDataBack} passVehiclesBack={this.passVehiclesBack} /> 
+                        <TollboothOperator web3={this.state.web3} accounts={this.state.accounts} vehicles={this.state.vehicles} passDataBack={this.passDataBack} passVehiclesBack={this.passVehiclesBack} />
                     </div>
                     <div style={{display: style3}}>
-                        <Regulator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack}  /> 
+                        <Vehicles web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} vehicles={this.state.vehicles} regulator={this.state.regulator} watchRegulator={this.state.watchRegulator} /> 
                     </div>
                     <div style={{display: style4}}>
-                        <Regulator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack}  /> 
                     </div>
                 </div>
             </div>

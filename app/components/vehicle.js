@@ -24,8 +24,6 @@ class Vehicle extends Component {
     }
     
     passVehiclesBack = (vehicles) => {
-        console.log("passVehiclesBack");
-        console.log(vehicles);
         this.props.passVehiclesBack(vehicles);
     }
 
@@ -72,7 +70,6 @@ class Vehicle extends Component {
             self.setState({vehicles, valueAddress: self.accounts[0]});
         })
         .catch( (error) => {
-            console.log(error);
             self.setState({formRErrors: [error]});
         });
         
