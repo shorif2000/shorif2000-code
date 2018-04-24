@@ -15,6 +15,12 @@ class TollboothOperator extends Component {
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.instantiateOperator = this.instantiateOperator.bind(this);
+        this.passTollboothOperatorBack = this.passTollboothOperatorBack.bind(this);
+    }
+
+    passTollboothOperatorBack(){
+        const state = this.state;
+        this.props.passTollboothOperatorBack({tollboothoperator: state});
     }
 
     componentDidCatch(error, errorInfo) {
@@ -44,6 +50,7 @@ class TollboothOperator extends Component {
         })
         .then(owner => {
             self.setState({owner, tollboothoperator : tollBoothOperatorInstance});
+            self.passTollboothOperatorBack();
         })
         .catch( (error) => {
             console.log('Error locating Tollbooth Operator ' + error);

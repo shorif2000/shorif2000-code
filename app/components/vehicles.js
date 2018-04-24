@@ -9,7 +9,9 @@ class Vehicles  extends Component {
         super(props)
         this.state = {
             balance: null,
-            formRErrors: []
+            formRErrors: [],
+            vehicle_address: '',
+            display: 'none'
         }
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -28,8 +30,10 @@ class Vehicles  extends Component {
     }
 
     instantiateContract = (vehicle_address) => {
-        const { regulator, owner } = this.props.regulator;
+        const regulator = this.props.regulator.regulator;
+        const tollboothoperator = this.props.tollboothoperator.tollboothoperator;
         if(regulator !== undefined){
+            if(tollboothoperator !== undefined){
             if(!this.props.web3.isAddress(vehicle_address)){
                 this.setState({formRErrors:['Invalid address']});
                 return;
@@ -40,31 +44,36 @@ class Vehicles  extends Component {
                 if(vehicleType == 0){
                     return Promise.reject('This vehicle does not exist.') ;
                 }
-                /*
-                self.props.web3.eth.getBalance(vehicle_address , (err, bal) => {
+                
+                return self.props.web3.eth.getBalance(vehicle_address);
+/* => {
       if (err) {
         console.log(`getBalance error: ${err}`);
+        self.setState({formRErrors:['get balance erro ' + err]});
       } else {
         balance = bal;
-        console.log(`Balance [${address}]: ${self.props.web3.fromWei(balance, "ether")}`);
+        console.log(`${self.props.web3.fromWei(balance, "ether")}`);
+
       }
-    });*/
+    });
                 var balance = self.props.web3.eth.getBalance(vehicle_address);
                 console.log(balance.toNumber());
                 balance = self.props.web3.toDecimal(balance);
                 console.log(balance);
+*/
             })
-            .then( tx  => {
-                //let balance = self.props.web3.fromWei(bal, "ether");
-                console.log(tx)
-                //self.setState({balance});
+            .then( bal => {
+                let balance = self.props.web3.fromWei(bal.toNumber(), "ether");
+                self.setState({balance, display: 'block'});  
             })
             .catch( (error) => {
                 console.log(error)
                 self.setState({formRErrors: 'error has occured'});
             });
 
-            
+            }else{
+                this.setState({formRErrors:['Load tollbooth operator before use']});
+            }
         }else{
             this.setState({formRErrors:['Load regulator before use']});
         }
@@ -82,8 +91,7 @@ class Vehicles  extends Component {
     }
 
     handleChange(event) {
-        this.setState({regulator_address: event.target.value});
-        this.passRegulatorBack;
+        this.setState({vehicle_address: event.target.value});
     }
 
     handleSubmit(event) {
@@ -98,7 +106,7 @@ class Vehicles  extends Component {
 
         return (
             <div className="container-fluid">
-                <div className="row-fluid">
+                <div className="row">
                 <form className="form-inline" onSubmit={this.handleSubmit}>
                 {formRErrors.map(error => (
                     <p key={error}>Error: {error}</p>
@@ -109,6 +117,12 @@ class Vehicles  extends Component {
                 </div>
                 <button type="submit"  className="btn btn-primary">Confirm</button>
                 </form>
+                </div>
+                <div className="row top-buffer" style={{display: this.state.display}}>
+                    <div className="col-xs-2">Balance: </div>
+                    <div className="col-xs-10">{this.state.balance}</div>
+                </div>
+                <div className="row top-buffer">
                 </div>
             </div>
         );
