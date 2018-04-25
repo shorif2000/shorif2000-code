@@ -50,7 +50,7 @@ class Vehicles  extends Component {
                     return Promise.reject('This vehicle does not exist.') ;
                 }
                 
-                return self.props.web3.eth.getBalance(vehicle_address);
+                return self.props.web3.eth.getBalancePromise(vehicle_address);
             })
             .then( bal => {
                 let balance = self.props.web3.fromWei(bal.toNumber(), "ether");
