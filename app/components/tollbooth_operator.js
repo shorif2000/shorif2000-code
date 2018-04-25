@@ -73,7 +73,7 @@ class TollboothOperator extends Component {
         const isEnabled = owner.length > 0;
         let tollbooth = '';
         if(isEnabled){
-            tollbooth = <Tollbooth tollboothoperator={tollboothoperator} owner={owner} web3={this.props.web3} accounts={this.props.accounts} vehicles={this.props.vehicles} passDataBack={this.props.passDataBack} />
+            tollbooth = <Tollbooth tollboothoperator={tollboothoperator} owner={owner} web3={this.props.web3} accounts={this.props.accounts} vehicles={this.props.vehicles} passDataBack={this.props.passDataBack} regulator={this.props.regulator} />
         }
 
         return (

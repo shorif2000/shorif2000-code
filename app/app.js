@@ -18,7 +18,8 @@ class App extends React.Component {
                 vehicles: [],
                 regulator : {},
                 watchRegulator: {},
-                tollboothoperator: {}
+                tollboothoperator: {},
+                tollbooths: []
             }
             this.handleDisplayPage = this.handleDisplayPage.bind(this);
     }
@@ -44,9 +45,15 @@ class App extends React.Component {
     }
 
     passTollboothOperatorBack = (data) => {
+        let self = this;
         let watchTollbooth = data.tollboothoperator.tollboothoperator.allEvents().watch((error, result) => {
             console.log(error);
             console.log(result);
+            if(result.event == "LogTollBoothAdded"){
+                let tollbooths = self.state.tollbooths;
+                tollbooths.push(result.args.tollBooth);
+                self.setState({tollbooths});
+            }
         });
         this.setState({tollboothoperator: data.tollboothoperator});
     }
@@ -115,10 +122,10 @@ class App extends React.Component {
                         <Regulator web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} passRegulatorBack={this.passRegulatorBack} passVehiclesBack={this.passVehiclesBack} /> 
                     </div>
                     <div style={{display: style2}}>
-                        <TollboothOperator web3={this.state.web3} accounts={this.state.accounts} vehicles={this.state.vehicles} passDataBack={this.passDataBack} passVehiclesBack={this.passVehiclesBack} passTollboothOperatorBack={this.passTollboothOperatorBack} />
+                        <TollboothOperator web3={this.state.web3} accounts={this.state.accounts} vehicles={this.state.vehicles} passDataBack={this.passDataBack} passVehiclesBack={this.passVehiclesBack} passTollboothOperatorBack={this.passTollboothOperatorBack} regulator={this.state.regulator.regulator} />
                     </div>
                     <div style={{display: style3}}>
-                        <Vehicles web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} vehicles={this.state.vehicles} regulator={this.state.regulator} tollboothoperator={this.state.tollboothoperator} /> 
+                        <Vehicles web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} vehicles={this.state.vehicles} regulator={this.state.regulator} tollboothoperator={this.state.tollboothoperator} tollbooths={this.state.tollbooths}/> 
                     </div>
                     <div style={{display: style4}}>
                     </div>
