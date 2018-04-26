@@ -9,17 +9,20 @@ import './interfaces/TollBoothOperatorI.sol';
 
 contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePriceHolder, Regulated, TollBoothOperatorI {
 	    
-	mapping( address => address ) private mEnterVehicleBooth;
-	mapping (bytes32 => address ) private mUsedHashVehicle;
-	mapping (bytes32 => uint ) private mUsedHash;
 	uint private collectedFees;
 	mapping (address => mapping ( address => uint) ) private mPendingPayments;
 	mapping (address => mapping ( address => uint) ) private mPendingPaymentPointer;
 	struct SecretStruct {
-	    bytes32 secretHashed;
+        address entryBooth;
 	    uint vType;
+        bool used;
+        address sender;
+        uint value;
+        bool exists;
+        bytes32 secretHashed; 
 	}
 	mapping ( address => mapping ( address => mapping ( uint => SecretStruct) ) ) private mSecret;
+    mapping ( bytes32 => SecretStruct ) private mHash;
 	
 	
 	function TollBoothOperator(bool paused, uint deposit, address regulator)
@@ -85,12 +88,12 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         uint vType = Regulated.getRegulator().getVehicleType(vehicle);
         require(vType > 0);
         require(isTollBooth(entryBooth));
-        //@todo ess than deposit * multiplier was sent alongside.
         require(msg.value >= (getDeposit() * getMultiplier(vType) ) );
-        require(mUsedHash[exitSecretHashed] == 0); // 2 for used to exit
-        mEnterVehicleBooth[msg.sender] = entryBooth;
-        mUsedHashVehicle[exitSecretHashed] = msg.sender;
-        mUsedHash[exitSecretHashed] = msg.value; //entered
+        require(mHash[exitSecretHashed].used == false);
+        mHash[exitSecretHashed].entryBooth = entryBooth;
+        mHash[exitSecretHashed].sender = msg.sender;
+        mHash[exitSecretHashed].value = msg.value;
+        mHash[exitSecretHashed].exists = true;
         LogRoadEntered(vehicle,entryBooth, exitSecretHashed, msg.value );
         return true;
     }
@@ -112,7 +115,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             address entryBooth,
             uint depositedWeis)
     {
-        return (mUsedHashVehicle[exitSecretHashed],mEnterVehicleBooth[mUsedHashVehicle[exitSecretHashed]],mUsedHash[exitSecretHashed]);
+        return ( mHash[exitSecretHashed].sender, mHash[exitSecretHashed].entryBooth, mHash[exitSecretHashed].value );
     }
             
     /**
@@ -166,7 +169,8 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         uint vType = Regulated.getRegulator().getVehicleType(vehicle);
         require(vType > 0); // vehicle is no longer a registered vehicle. && vehicle is no longer allowed on this road system.
         require(msg.sender != entryBooth);
-        require(mUsedHash[hashSecret(exitSecretClear)] > 0); //secret does not match a hashed one. && secret has already been reported on exit.
+        require(mHash[hashSecret(exitSecretClear)].exists); //secret does not match a hashed one. 
+        require(!mHash[hashSecret(exitSecretClear)].used);//secret has already been reported on exit.
         if(getRoutePrice(entryBooth,msg.sender) == 0){ //if the fee is not known at the time of exit, i.e. if the fee is 0, the pending payment is recorded, and "base route price required" event is emitted and listened to by the operator's oracle.
             mPendingPayments[entryBooth][msg.sender] += 1;
             mSecret[entryBooth][msg.sender][mPendingPayments[entryBooth][msg.sender]].secretHashed = hashSecret(exitSecretClear);
@@ -174,8 +178,9 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             LogPendingPayment(hashSecret(exitSecretClear), entryBooth, msg.sender);
             return 2;
         }
-        uint finalFee =  getRoutePrice(entryBooth,msg.sender) * getMultiplier(vType); //mUsedHash[hashSecret(exitSecretClear)] * getMultiplier(vType);
-        mUsedHash[hashSecret(exitSecretClear)] = 0;
+        uint finalFee =  getRoutePrice(entryBooth,msg.sender) * getMultiplier(vType); 
+        mHash[hashSecret(exitSecretClear)].value = 0;
+        mHash[hashSecret(exitSecretClear)].used = true;
         collectedFees += finalFee;
         if(finalFee >= depositedWeis) //if the fee is equal to or higher than the deposit, then the whole deposit is used and no more is asked of the vehicle, now or before any future trip.
         {   
@@ -239,7 +244,6 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             uint depositedW;
             bytes32 secretHashed = mSecret[entryBooth][exitBooth][mPendingPaymentPointer[entryBooth][exitBooth]].secretHashed;
             (vehicle2, entryBooth2, depositedW) = getVehicleEntry(secretHashed);
-            //uint fee = getDeposit() * getMultiplier(mSecret[entryBooth][exitBooth][mPendingPaymentPointer[entryBooth][exitBooth]].vType);
             uint fee =  getRoutePrice(entryBooth,exitBooth) * getMultiplier(mSecret[entryBooth][exitBooth][mPendingPaymentPointer[entryBooth][exitBooth]].vType);
             collectedFees += fee;
             uint refund = depositedW - fee;
@@ -247,7 +251,8 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             {
                 vehicle2.transfer(refund);
             }
-            mUsedHash[secretHashed] = 0;
+            mHash[secretHashed].used = true;
+            mHash[secretHashed].value = 0;
             LogRoadExited(exitBooth,secretHashed,fee,refund);
             
         }
@@ -333,7 +338,8 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             address entryBooth2;
             uint depositedW;
             (vehicle2, entryBooth2, depositedW) = getVehicleEntry(mSecret[entryBooth][exitBooth][index].secretHashed);
-            mUsedHash[mSecret[entryBooth][exitBooth][index].secretHashed] = 0;
+            mHash[mSecret[entryBooth][exitBooth][index].secretHashed].used = true;
+            mHash[mSecret[entryBooth][exitBooth][index].secretHashed].value = 0;
             
             uint fee = getRoutePrice(entryBooth2,exitBooth) * getMultiplier(mSecret[entryBooth][exitBooth][index].vType);
 	    

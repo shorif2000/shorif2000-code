@@ -379,7 +379,7 @@ describe("scenario5", function() {
         //console.log(info.hashed0[2].toNumber());
         assert.strictEqual(info.hashed0[0], vehicle1);
         assert.strictEqual(info.hashed0[1], booth1);
-        assert.strictEqual(info.hashed0[2].toNumber(), 14); // vehicle has exited so this value is missing
+        assert.strictEqual(info.hashed0[2].toNumber(), 0); // vehicle has exited so this value is missing
         assert.strictEqual(info.pendingCount01.toNumber(), 0);
         return Promise.allNamed({
             operator: () => web3.eth.getBalancePromise(operator.address),
@@ -544,7 +544,7 @@ describe("scenario 6", function() {
     .then(info => {
         assert.strictEqual(info.hashed1[0], vehicle1);
         assert.strictEqual(info.hashed1[1], booth1);
-        assert.strictEqual(info.hashed1[2].toNumber(), vehicleValue);
+        assert.strictEqual(info.hashed1[2].toNumber(), 0);
         assert.strictEqual(info.pendingCount01.toNumber(), 1);
 
         return operator.clearSomePendingPayments.call(booth1, booth2, 1, {from: anyone});
