@@ -139,7 +139,7 @@ class Vehicles  extends Component {
                             self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount}) )
                 .then(success => {if(success){return }})
                 .then(() => operator.enterRoad(
-                            self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount, gas:5000000 } ) )
+                            self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount, gas: 5000000 } ) )
                 .then(tx => {
                     return operator.getVehicleEntry(hashed);
                 })
@@ -162,7 +162,7 @@ class Vehicles  extends Component {
                             self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount})})
                 .then(success => {if(success){console.log(success); return; }})
                 .then(() => operator.enterRoad(
-                            self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount, gas:5000000 }))
+                            self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount, gas: 5000000 }))
                 .then(tx => {
                     return operator.getVehicleEntry(hashed);
                 })
