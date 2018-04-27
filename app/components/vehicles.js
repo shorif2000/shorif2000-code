@@ -120,6 +120,7 @@ class Vehicles  extends Component {
         event.preventDefault();
         const operator = this.props.tollboothoperator.tollboothoperator;
         let self = this;
+        const secret32 = toBytes32(this.state.secret);
         let hashed;
         if(this.multiplier == ''){
             console.log("this.vehicleType" , this.vehicleType);
@@ -129,7 +130,7 @@ class Vehicles  extends Component {
                     if( multiplier.toNumber() == 0){
                         console.log("multiplier" ,multiplier.toNumber());
                         self.multiplier = multiplier.toNumber();
-                        return operator.hashSecret(self.state.secret)
+                        return operator.hashSecret(secret32)
                     }
                     return Promise.reject('Multiplier not set for this vehicle type');
                 })
@@ -153,7 +154,7 @@ class Vehicles  extends Component {
 
         }else{
             console.log("multiplier not empty", this.multiplier);
-            operator.hashSecret(this.state.secret)
+            operator.hashSecret(secret32)
                 .then(hash => hashed = hash)
                 .then( () => {
                     console.log("hash: ", hashed);
