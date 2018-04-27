@@ -137,7 +137,7 @@ class Vehicles  extends Component {
                             self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount}) )
                 .then(success => {if(success){return }})
                 .then(() => operator.enterRoad(
-                            self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount} ) )
+                            self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount, gas:5000000 } ) )
                 .then(tx => {
                     return operator.getVehicleEntry(hashed);
                 })
@@ -151,13 +151,16 @@ class Vehicles  extends Component {
                 });
 
         }else{
+            console.log("multiplier not empty", this.multiplier);
             operator.hashSecret(this.state.secret)
                 .then(hash => hashed = hash)
-                .then( () => operator.enterRoad.call(
-                            self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount}))
-                .then(success => {if(success){return }})
+                .then( () => {
+                    console.log("hash: ", hashed);
+                    return operator.enterRoad.call(
+                            self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount})})
+                .then(success => {if(success){console.log(success); return; }})
                 .then(() => operator.enterRoad(
-                            self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount}))
+                            self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount, gas:5000000 }))
                 .then(tx => {
                     return operator.getVehicleEntry(hashed);
                 })
