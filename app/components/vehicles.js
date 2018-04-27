@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+const toBytes32 = require('../../utils/toBytes32.js');
 
 let regulatorInstance;
 let watchRegulator;
