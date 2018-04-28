@@ -37,18 +37,18 @@ class App extends React.Component {
     }
 
     passRegulatorBack = (data) => {
-        let watchRegulator = data.regulator.regulator.allEvents().watch((error, result) => {
+        /*let watchRegulator = data.regulator.regulator.allEvents().watch((error, result) => {
             console.log(error);
             console.log(result);
-        });
+        });*/
         this.setState({regulator: data.regulator});
     }
 
     passTollboothOperatorBack = (data) => {
         let self = this;
         let watchTollbooth = data.tollboothoperator.tollboothoperator.allEvents().watch((error, result) => {
-            console.log(error);
-            console.log(result);
+            //console.log(error);
+            //console.log(result);
             if(result.event == "LogTollBoothAdded"){
                 let tollbooths = self.state.tollbooths;
                 tollbooths.push(result.args.tollBooth);

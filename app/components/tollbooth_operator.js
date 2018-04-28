@@ -51,9 +51,13 @@ class TollboothOperator extends Component {
         .then(owner => {
             self.setState({owner, tollboothoperator : tollBoothOperatorInstance});
             self.passTollboothOperatorBack();
-	    return tollBoothOperatorInstance.setPaused(false,{from: owner});
+	    return tollBoothOperatorInstance.isPaused();
+	})
+	.then(paused => {
+	    if(paused){
+	        return tollBoothOperatorInstance.setPaused(false,{from: self.state.owner});
+	    }
         })
-	.then(tx => console.log(tx))
         .catch( (error) => {
             console.log('Error locating Tollbooth Operator ' + error);
             self.setState({formRErrors: ['Error locating Regulator ' + error]});

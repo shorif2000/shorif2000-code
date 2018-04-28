@@ -3,7 +3,7 @@ const toBytes32 = require('../../utils/toBytes32.js');
 
 let regulatorInstance;
 let watchRegulator;
-
+let tollboothoperator;
 class Vehicles  extends Component {
 
     constructor(props) {
@@ -18,7 +18,9 @@ class Vehicles  extends Component {
                 formEErrors : [],
                 tollbooth: '',
                 select_tollbooth: null,
-                tollbooth_history: []
+                tollbooth_history: [],
+		logRoadEntered: [],
+		logRoadExited: []
             }
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -28,6 +30,7 @@ class Vehicles  extends Component {
         this.passRegulatorBack = this.passRegulatorBack.bind(this);
         this.multiplier = '';
         this.vehicleType = '';
+	this.loadHistory = this.loadHistory.bind(this);
     }
 
     passDataBack(){
@@ -41,7 +44,7 @@ class Vehicles  extends Component {
 
     instantiateContract = (vehicle_address) => {
         const regulator = this.props.regulator.regulator;
-        const tollboothoperator = this.props.tollboothoperator.tollboothoperator;
+        tollboothoperator = this.props.tollboothoperator.tollboothoperator;
         if(regulator !== undefined){
             if(tollboothoperator !== undefined){
                 if(!this.props.web3.isAddress(vehicle_address)){
@@ -59,7 +62,6 @@ class Vehicles  extends Component {
                     })
                 .then( multiplier => {
                     if( multiplier.toNumber() != 0){
-                        console.log("multiplier" ,multiplier);
                         self.multiplier = multiplier.toNumber();
                     }
 
@@ -70,16 +72,19 @@ class Vehicles  extends Component {
                     tollboothoperator.LogTollBoothAdded( {}, {fromBlock: 0,to:'latest'})
                     .get(function(error,logEvent) {
                         if(error)
-                    {
-                        console.error(error)
-                    } else {
-                        var tollbooth_history = [];
-                        Object.keys(logEvent).map(key =>
-                            tollbooth_history.push(logEvent[key].args.tollBooth)
-                            )
-                            self.setState({balance, display: 'block',tollbooth_history});
-                    }
+                    	{
+                        console.log(error);	
+	                } else {
+        	                var tollbooth_history = [];
+                	        Object.keys(logEvent).map(key =>
+                        	    tollbooth_history.push(logEvent[key].args.tollBooth)
+                            	)	
+                            self.setState({balance, display: 'block',tollbooth_history, formRErrors:[]});
+                    	}
                     });
+
+			self.loadHistory();
+
                 })
                 .catch( (error) => {
                     console.log(error)
@@ -95,6 +100,47 @@ class Vehicles  extends Component {
 
     }
     componentDidMount(){
+    }
+
+    loadHistory(){
+	let self = this;
+	tollboothoperator.LogRoadEntered( {}, {fromBlock: 0,to:'latest'})
+                    .get(function(error,logEvent) {
+                        if(error)
+                        {
+                                console.error(error)
+                        } else {
+                                var logRoadEntered = [];
+                                Object.keys(logEvent).map(key =>{
+                                    if(logEvent[key].args.vehicle == self.state.vehicle_address){
+        return                                logRoadEntered.push({entryBooth: logEvent[key].args.entryBooth , depositedWeis : logEvent[key].args.depositedWeis.toNumber(), exitSecretHashed : logEvent[key].args.exitSecretHashed})
+                                    }
+                                        }
+                                )
+
+                            self.setState({ logRoadEntered });
+                        }
+                    });
+
+                    tollboothoperator.LogRoadExited( {}, {fromBlock: 0,to:'latest'})
+                    .get(function(error,logEvent) {
+                        if(error)
+                        {
+                                console.error(error)
+                        } else {
+                                var logRoadExited = [];
+                                Object.keys(logEvent).map(key =>{
+                                    if(logEvent[key].args.vehicle == self.state.vehicle_address){
+  return                                      logRoadExited.push({exitBooth: logEvent[key].args.exitBooth , finalFee : logEvent[key].args.finalFee.toNumber(), refundWeis : logEvent[key].args.refundWeis})
+                                    }
+}
+                                )
+
+
+                            self.setState({ logRoadExited });
+                        }
+                    });
+
     }
 
     componentDidCatch(error, errorInfo) {
@@ -123,12 +169,9 @@ class Vehicles  extends Component {
         const secret32 = toBytes32(this.state.secret);
         let hashed;
         if(this.multiplier == ''){
-            console.log("this.vehicleType" , this.vehicleType);
             operator.getMultiplier(this.vehicleType)
                 .then( multiplier => {
-                    console.log("multiplier", multiplier)
                     if( multiplier.toNumber() == 0){
-                        console.log("multiplier" ,multiplier.toNumber());
                         self.multiplier = multiplier.toNumber();
                         return operator.hashSecret(secret32)
                     }
@@ -141,29 +184,27 @@ class Vehicles  extends Component {
                 .then(() => operator.enterRoad(
                             self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount, gas: 5000000 } ) )
                 .then(tx => {
-                    return operator.getVehicleEntry(hashed);
+			self.loadHistory();
                 })
-            .then(info => {
-                return self.props.web3.eth.getBalancePromise(operator.address);
-            })
-            .then(balance => console.log( balance.toNumber()))
                 .catch( error => {
                     console.log(error);
                     self.setState({formRErrors: ['error has occured']});
                 });
 
         }else{
-            console.log("multiplier not empty", this.multiplier);
             operator.hashSecret(secret32)
                 .then(hash => hashed = hash)
                 .then( () => {
-                    console.log("hash: ", hashed);
                     return operator.enterRoad.call(
                             self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount, gas: 5000000 }) })
-                .then(success => {if(success){console.log(success); return; }})
+                .then(success => {
+			if(success){ return; } 
+			return Promise.reject('Failed to enter road');
+		})
                 .then(() => operator.enterRoad(
                             self.state.tollbooth, hashed, { from: self.state.vehicle_address, value: self.state.amount, gas: 5000000 }))
                 .then(tx => {
+self.loadHistory();
                     return operator.getVehicleEntry(hashed);
                 })
                 .catch( error => {
@@ -178,7 +219,6 @@ class Vehicles  extends Component {
     }
 
     render() {
-        console.log(this);
         let { formRErrors, formEErrors, select_tollbooth, tollbooth, balance, vehicle_address, display, amount, secret, tollbooth_history } = this.state;
         if(this.props.tollbooths.length > 0){
             tollbooth_history.push(...this.props.tollbooths);
@@ -235,6 +275,19 @@ class Vehicles  extends Component {
             </form>
             </div>
             </div>
+		<div>
+			<div className="row">Vehicle history</div>
+			<div className="col-xs-6">
+				<div className="row">enter road</div>
+				<div className="row"><pre>{JSON.stringify(this.state.logRoadEntered, null, 2) }</pre></div>
+			</div>
+			<div className="col-xs-6">
+			<div className="col-xs-6">
+                                <div className="row">exit road</div>
+                                <div className="row"><pre>{JSON.stringify(this.state.logRoadExited, null, 2) }</pre></div>
+                        </div>
+			</div>
+		</div>
             </div>
             );
     }

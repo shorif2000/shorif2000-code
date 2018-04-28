@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { slide as Slide } from 'react-burger-menu'
+import { push as Slide } from 'react-burger-menu'
 
 class Menu extends Component {
   showSettings (event) {
@@ -8,7 +8,7 @@ class Menu extends Component {
 
   render () {
     return (
-      <Slide>
+      <Slide noOverlay  >
         <a href="#" onClick={this.props.displaypage} id="page1">Home</a>
         <a href="#" onClick={this.props.displaypage} id="page2">Tollbooth Operator</a>
         <a href="#" onClick={this.props.displaypage} id="page3">Vehicles</a>
