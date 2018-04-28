@@ -84,8 +84,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         payable
         returns (bool success)
     {
-        address vehicle = msg.sender;
-        uint vType = Regulated.getRegulator().getVehicleType(vehicle);
+        uint vType = Regulated.getRegulator().getVehicleType(msg.sender);
         require(vType > 0);
         require(isTollBooth(entryBooth));
         require(msg.value >= (getDeposit() * getMultiplier(vType) ) );
@@ -94,7 +93,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         mHash[exitSecretHashed].sender = msg.sender;
         mHash[exitSecretHashed].value = msg.value;
         mHash[exitSecretHashed].exists = true;
-        LogRoadEntered(vehicle,entryBooth, exitSecretHashed, msg.value );
+        LogRoadEntered(msg.sender,entryBooth, exitSecretHashed, msg.value );
         return true;
     }
     
