@@ -56,6 +56,18 @@ class App extends React.Component {
                 self.setState({tollbooths});
             }
         });
+	let self = this;
+        tollboothoperator
+        .LogTollBoothAdded({}, { fromBlock: 0, to: 'latest' })
+        .get(function(error, logEvent) {
+            if (error) {
+                console.error(error);
+            } else {
+                var tollbooths = [];
+                Object.keys(logEvent).map(key => tollbooths.push(logEvent[key].args.tollBooth));
+                self.setState({ tollbooths });
+            }
+        });
         this.setState({tollboothoperator: data.tollboothoperator});
     }
 
