@@ -7,6 +7,7 @@ import Menu from './components/menu';
 import Regulator from './components/regulator';
 import TollboothOperator from './components/tollbooth_operator';
 import Vehicles from './components/vehicles';
+import Tollbooths from './components/tollbooths';
 
 class App extends React.Component {
     constructor(props) {
@@ -128,6 +129,7 @@ class App extends React.Component {
                         <Vehicles web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} vehicles={this.state.vehicles} regulator={this.state.regulator} tollboothoperator={this.state.tollboothoperator} tollbooths={this.state.tollbooths}/> 
                     </div>
                     <div style={{display: style4}}>
+			<Tollbooths web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} vehicles={this.state.vehicles} regulator={this.state.regulator} tollboothoperator={this.state.tollboothoperator} tollbooths={this.state.tollbooths}/>
                     </div>
                 </div>
             </div>
