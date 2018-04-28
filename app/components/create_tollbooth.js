@@ -41,7 +41,7 @@ class CreateTollboothOperator extends Component {
             let operators = [];
             operators.push({owner: tx.logs[1].args.owner, address: tx.logs[1].args.newOperator, deposit: tx.logs[1].args.depositWeis.toNumber()});
             self.setState({operators});
-        });    
+        })
         
     }
 

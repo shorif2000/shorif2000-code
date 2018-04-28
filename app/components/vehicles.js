@@ -83,7 +83,7 @@ class Vehicles  extends Component {
                 })
                 .catch( (error) => {
                     console.log(error)
-                    self.setState({formRErrors: 'error has occured'});
+                    self.setState({formRErrors: ['error has occured']});
                 });
 
             }else{
@@ -166,10 +166,6 @@ class Vehicles  extends Component {
                 .then(tx => {
                     return operator.getVehicleEntry(hashed);
                 })
-            .then(info => {
-                return self.props.web3.eth.getBalancePromise(operator.address);
-            })
-            .then(balance => console.log( balance.toNumber())) 
                 .catch( error => {
                     console.log(error);
                     self.setState({formRErrors: ['error has occured']});
