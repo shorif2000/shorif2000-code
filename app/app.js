@@ -129,7 +129,7 @@ class App extends React.Component {
                         <Vehicles web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} vehicles={this.state.vehicles} regulator={this.state.regulator} tollboothoperator={this.state.tollboothoperator} tollbooths={this.state.tollbooths}/> 
                     </div>
                     <div style={{display: style4}}>
-			<Tollbooths web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} vehicles={this.state.vehicles} regulator={this.state.regulator} tollboothoperator={this.state.tollboothoperator} tollbooths={this.state.tollbooths}/>
+			<Tollbooths web3={this.state.web3} tollboothoperator={this.state.tollboothoperator} />
                     </div>
                 </div>
             </div>
