@@ -29,19 +29,13 @@ console.log(tollboothoperator);
                 this.setState({ formRErrors: ['Invalid address'] });
                 return;
             }
-            let self = this;
-            tollboothoperator.isTollbooth(tollbooth_address)
-                .then(isIndeed => {
-                    if (!isIndeed) {
-                        return Promise.reject('This is not a valid tollbooth.');
-                    }
-                    self.setState({ tollbooth: tollbooth_address });
-                    self.loadHistory();
-                })
-                .catch(error => {
-                    console.log(error);
-                    self.setState({ formRErrors: ['error has occured'] });
-                });
+	    if(!this.props.tollbooths.indexOf(tollbooth_address)){
+		this.setState({ formRErrors: ['This is not a valid tollbooth.'] });
+		return ;
+	    }
+
+            self.setState({ tollbooth: tollbooth_address });
+            self.loadHistory();
         } else {
             this.setState({
                 formRErrors: ['Load tollbooth operator before use']

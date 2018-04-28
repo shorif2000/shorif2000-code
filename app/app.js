@@ -53,12 +53,11 @@ class App extends React.Component {
             if(result.event == "LogTollBoothAdded"){
                 let tollbooths = self.state.tollbooths;
                 tollbooths.push(result.args.tollBooth);
+		tollbooths = [...new Set(tollbooths)];
                 self.setState({tollbooths});
             }
         });
-	let self = this;
-        tollboothoperator
-        .LogTollBoothAdded({}, { fromBlock: 0, to: 'latest' })
+        tollboothoperator.LogTollBoothAdded({}, { fromBlock: 0, to: 'latest' })
         .get(function(error, logEvent) {
             if (error) {
                 console.error(error);
@@ -141,7 +140,7 @@ class App extends React.Component {
                         <Vehicles web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} vehicles={this.state.vehicles} regulator={this.state.regulator} tollboothoperator={this.state.tollboothoperator} tollbooths={this.state.tollbooths}/> 
                     </div>
                     <div style={{display: style4}}>
-			<Tollbooths web3={this.state.web3} tollboothoperator={this.state.tollboothoperator} />
+			<Tollbooths web3={this.state.web3} tollboothoperator={this.state.tollboothoperator} tollbooths={this.state.tollbooths}/>
                     </div>
                 </div>
             </div>
