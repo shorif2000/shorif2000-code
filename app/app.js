@@ -20,7 +20,8 @@ class App extends React.Component {
                 regulator : {},
                 watchRegulator: {},
                 tollboothoperator: {},
-                tollbooths: []
+                tollbooths: [],
+		exitSecretHashed : ''
             }
             this.handleDisplayPage = this.handleDisplayPage.bind(this);
     }
@@ -37,6 +38,12 @@ class App extends React.Component {
         });
     }
 
+    passSecretHashBack = (data) => {
+        this.setState({
+             exitSecretHashed : data
+        });
+    }
+
     passRegulatorBack = (data) => {
         /*let watchRegulator = data.regulator.regulator.allEvents().watch((error, result) => {
             console.log(error);
@@ -47,16 +54,6 @@ class App extends React.Component {
 
     passTollboothOperatorBack = (data) => {
         let self = this;
-        let watchTollbooth = data.tollboothoperator.tollboothoperator.allEvents().watch((error, result) => {
-            //console.log(error);
-            //console.log(result);
-            if(result.event == "LogTollBoothAdded"){
-                let tollbooths = self.state.tollbooths;
-                tollbooths.push(result.args.tollBooth);
-		tollbooths = [...new Set(tollbooths)];
-                self.setState({tollbooths});
-            }
-        });
         data.tollboothoperator.tollboothoperator.LogTollBoothAdded({}, { fromBlock: 0, to: 'latest' })
         .get(function(error, logEvent) {
             if (error) {
@@ -137,10 +134,10 @@ class App extends React.Component {
                         <TollboothOperator web3={this.state.web3} accounts={this.state.accounts} vehicles={this.state.vehicles} passDataBack={this.passDataBack} passVehiclesBack={this.passVehiclesBack} passTollboothOperatorBack={this.passTollboothOperatorBack} regulator={this.state.regulator.regulator} />
                     </div>
                     <div style={{display: style3}}>
-                        <Vehicles web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} vehicles={this.state.vehicles} regulator={this.state.regulator} tollboothoperator={this.state.tollboothoperator} tollbooths={this.state.tollbooths}/> 
+                        <Vehicles web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} vehicles={this.state.vehicles} regulator={this.state.regulator} tollboothoperator={this.state.tollboothoperator} tollbooths={this.state.tollbooths} passSecretBack={this.passSecretBack} /> 
                     </div>
                     <div style={{display: style4}}>
-			<Tollbooths web3={this.state.web3} tollboothoperator={this.state.tollboothoperator} tollbooths={this.state.tollbooths}/>
+			<Tollbooths web3={this.state.web3} tollboothoperator={this.state.tollboothoperator} tollbooths={this.state.tollbooths} exitSecretHashed={this.state.exitSecretHashed} />
                     </div>
                 </div>
             </div>

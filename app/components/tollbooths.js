@@ -3,6 +3,7 @@ const toBytes32 = require('../../utils/toBytes32.js');
 let regulatorInstance;
 let watchRegulator;
 let tollboothoperator;
+
 class Tollbooths extends Component {
     constructor(props) {
         super(props);
@@ -45,7 +46,14 @@ console.log(this.props.tollbooths.indexOf(tollbooth_address));
 
     loadHistory() {
         let self = this;
+	let exitSecretHashed = '';
+	if(this.props.exitSecretHashed){
+	    exitSecretHashed = this.props.exitSecretHashed;
+	}else if(this.state.secret != ''){
+	    exitSecretHashed = toBytes32(self.state.secret);
+	}
 
+	if(exitSecretHashed != ''){	
         tollboothoperator
             .LogPendingPayment({}, { fromBlock: 0, to: 'latest' })
             .get(function(error, logEvent) {
@@ -55,8 +63,7 @@ console.log(this.props.tollbooths.indexOf(tollbooth_address));
                     var logPendingPayment = [];
                     Object.keys(logEvent).map(key => {
                         if (
-                            logEvent[key].args.exitSecretHashed ==
-                            self.state.exitSecretHashed
+                            logEvent[key].args.exitSecretHashed == exitSecretHashed
                         ) {
                             return logPendingPayment.push({
                                 entryBooth: logEvent[key].args.entryBooth,
@@ -69,6 +76,7 @@ console.log(this.props.tollbooths.indexOf(tollbooth_address));
                     self.setState({ logPendingPayment });
                 }
             });
+	}
     }
     componentDidCatch(error, errorInfo) {
         // Catch errors in any components below and re-render with error message
@@ -93,9 +101,28 @@ console.log(this.props.tollbooths.indexOf(tollbooth_address));
         let hashed;
 	const { secret, tollbooth_address } = this.state;
         if (secret != '') {
-            operator.reportExitRoad.call(this.state.secret, { from: tollbooth_address })
+	    const secret32 = toBytes32(secret);
+	    operator.isPaused()
+	    .then( isPaused => {
+console.log(isPaused);
+		if(isPaused){
+		    return operator.setPaused(false,{from: self.props.tollboothoperator.owner});
+		}
+	    })
+	    /*.then( () => {
+		return operator.isTollbooth(tollbooth_address, {from: self.props.tollboothoperator.owner});
+	    })
+	    .then( (isTollbooth) => {
+		console.log(isTollbooth);
+		if(!isTollbooth){
+		    return Promise.reject(
+                        'Not a tollbooth'
+                    );
+		}
+	    })*/
+	    .then( () => operator.reportExitRoad.call(secret32, { from: tollbooth_address, gas: 5000000 }) )
                     .then(result => console.log(result) )
-                    .then(() => operator.reportExitRoad(secret, { from: tollbooth_address }))
+                    .then(() => operator.reportExitRoad(secret32, { from: tollbooth_address , gas: 5000000}))
 .then((tx) => console.log(tx))
                 .catch(error => {
 			if(typeof(error) === "object"){

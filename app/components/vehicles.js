@@ -40,6 +40,13 @@ class Vehicles extends Component {
             watchRegulator: watchRegulator
         });
     }
+
+    passSecretBack() {
+        this.props.passSecretBack({
+            exitSecretHashed : this.logRoadEntered[0].exitSecretHashed
+        });
+    }
+
     instantiateContract = vehicle_address => {
         const regulator = this.props.regulator.regulator;
         tollboothoperator = this.props.tollboothoperator.tollboothoperator;
