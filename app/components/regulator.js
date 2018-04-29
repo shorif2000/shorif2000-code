@@ -47,11 +47,15 @@ class Regulator extends Component {
             return regulatorInstance.getOwner();
         })
         .then(owner => {
-            self.setState({owner: owner, regulator: regulatorInstance});
+            self.setState({owner: owner, regulator: regulatorInstance, formRErrors: []});
             self.passRegulatorBack();
         })
         .catch( (error) => {
-            self.setState({formRErrors: ['Error locating Regulator ' + error]});
+	    if(typeof(error) === "object"){
+		console.log(error);
+                error = "unexpected error, check console";
+            }
+            self.setState({formRErrors: [error]});
         });
     }
     componentDidMount(){

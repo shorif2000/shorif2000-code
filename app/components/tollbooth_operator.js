@@ -16,11 +16,12 @@ class TollboothOperator extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.instantiateOperator = this.instantiateOperator.bind(this);
         this.passTollboothOperatorBack = this.passTollboothOperatorBack.bind(this);
+	this.owner = '';
+	this.tollboothoperator = '';
     }
 
     passTollboothOperatorBack(){
-        const state = this.state;
-        this.props.passTollboothOperatorBack({tollboothoperator: state});
+        this.props.passTollboothOperatorBack({tollboothoperator: {owner: this.owner, tollboothoperator: this.tollboothoperator}});
     }
 
     componentDidCatch(error, errorInfo) {
@@ -42,25 +43,31 @@ class TollboothOperator extends Component {
         const tollBoothOperatorJson = require("../contracts/TollBoothOperator.json");
         const TollBoothOperator = truffleContract(tollBoothOperatorJson);
         TollBoothOperator.setProvider(this.props.web3.currentProvider);
-
         let self = this;
         TollBoothOperator.at(tollboothoperator_address).then((instance) => {
             tollBoothOperatorInstance = instance;
+            self.tollboothoperator = tollBoothOperatorInstance;
             return tollBoothOperatorInstance.getOwner();
         })
         .then(owner => {
-            self.setState({owner, tollboothoperator : tollBoothOperatorInstance});
-            self.passTollboothOperatorBack();
+	    self.owner = owner;
 	    return tollBoothOperatorInstance.isPaused();
 	})
 	.then(paused => {
 	    if(paused){
-	        return tollBoothOperatorInstance.setPaused(false,{from: self.state.owner});
+	        return tollBoothOperatorInstance.setPaused(false,{from: self.owner});
 	    }
         })
+	.then(()=>{
+		self.passTollboothOperatorBack();
+		self.setState({owner : self.owner, tollboothoperator : self.tollboothoperator, formRErrors: []})
+	})
         .catch( (error) => {
-            console.log('Error locating Tollbooth Operator ' + error);
-            self.setState({formRErrors: ['Error locating Regulator ' + error]});
+	    if(typeof(error) === "object"){
+		console.log(error);
+		error = "unexpected error, check console";
+	    }
+            self.setState({formRErrors: [error]});
         });
     }
 
@@ -73,7 +80,7 @@ class TollboothOperator extends Component {
         this.setState({tollboothoperator_address: event.target.value});
     }
 
-    render(){        
+    render(){
         const { formRErrors } = this.state;
         const { tollboothoperator, owner } = this.state;
         const isEnabled = owner.length > 0;

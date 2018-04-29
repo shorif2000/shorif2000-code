@@ -67,7 +67,7 @@ class Vehicle extends Component {
             let vehicles = self.state.vehicles;
             vehicles.push({address: self.state.valueAddress, type: self.state.valueVehicle});
             self.passVehiclesBack(vehicles);
-            self.setState({vehicles, valueAddress: self.accounts[0]});
+            self.setState({vehicles, valueAddress: self.accounts[0], formRErrors: []});
         })
         .catch( (error) => {
             self.setState({formRErrors: [error]});

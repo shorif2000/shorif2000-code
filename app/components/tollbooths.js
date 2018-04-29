@@ -23,19 +23,19 @@ class Tollbooths extends Component {
 
     instantiateContract = tollbooth_address => {
         tollboothoperator = this.props.tollboothoperator.tollboothoperator;
-console.log(tollboothoperator);
         if (tollboothoperator !== undefined) {
             if (!this.props.web3.isAddress(tollbooth_address)) {
                 this.setState({ formRErrors: ['Invalid address'] });
                 return;
             }
-	    if(!this.props.tollbooths.indexOf(tollbooth_address)){
-		this.setState({ formRErrors: ['This is not a valid tollbooth.'] });
+console.log(this.props.tollbooths.indexOf(tollbooth_address));
+	    if(this.props.tollbooths.indexOf(tollbooth_address) < 0){
+		this.setState({ formRErrors: ['This is not a valid tollbooth.'] , display: 'none'});
 		return ;
 	    }
 
-            self.setState({ tollbooth: tollbooth_address });
-            self.loadHistory();
+            this.setState({ tollbooth: tollbooth_address , formRErrors: [], display: 'block'});
+            this.loadHistory();
         } else {
             this.setState({
                 formRErrors: ['Load tollbooth operator before use']
@@ -91,87 +91,28 @@ console.log(tollboothoperator);
         let self = this;
         const secret32 = toBytes32(this.state.secret);
         let hashed;
-        if (this.multiplier == '') {
-            operator
-                .getMultiplier(this.vehicleType)
-                .then(multiplier => {
-                    if (multiplier.toNumber() == 0) {
-                        self.multiplier = multiplier.toNumber();
-                        return operator.hashSecret(secret32);
-                    }
-                    return Promise.reject(
-                        'Multiplier not set for this vehicle type'
-                    );
-                })
-                .then(hash => (hashed = hash))
-                .then(() =>
-                    operator.enterRoad.call(self.state.tollbooth, hashed, {
-                        from: self.state.tollbooth_address,
-                        value: self.state.amount,
-                        gas: 5000000
-                    })
-                )
-                .then(success => {
-                    if (success) {
-                        return;
-                    }
-                })
-                .then(() =>
-                    operator.enterRoad(self.state.tollbooth, hashed, {
-                        from: self.state.tollbooth_address,
-                        value: self.state.amount,
-                        gas: 5000000
-                    })
-                )
-                .then(tx => {
-                    self.loadHistory();
-                })
+	const { secret, tollbooth_address } = this.state;
+        if (secret != '') {
+            operator.reportExitRoad.call(this.state.secret, { from: tollbooth_address })
+                    .then(result => console.log(result) )
+                    .then(() => operator.reportExitRoad(secret, { from: tollbooth_address }))
+.then((tx) => console.log(tx))
                 .catch(error => {
-                    console.log(error);
+			if(typeof(error) === "object"){
+                   	 console.log(error);
+				error = "unknown, check console"
+			}
                     self.setState({ formRErrors: ['error has occured'] });
                 });
         } else {
-            operator
-                .hashSecret(secret32)
-                .then(hash => (hashed = hash))
-                .then(() => {
-                    return operator.enterRoad.call(
-                        self.state.tollbooth,
-                        hashed,
-                        {
-                            from: self.state.tollbooth_address,
-                            value: self.state.amount,
-                            gas: 5000000
-                        }
-                    );
-                })
-                .then(success => {
-                    if (success) {
-                        return;
-                    }
-                    return Promise.reject('Failed to enter road');
-                })
-                .then(() =>
-                    operator.enterRoad(self.state.tollbooth, hashed, {
-                        from: self.state.tollbooth_address,
-                        value: self.state.amount,
-                        gas: 5000000
-                    })
-                )
-                .then(tx => {
-                    self.loadHistory();
-                    return operator.getVehicleEntry(hashed);
-                })
-                .catch(error => {
-                    console.log(error);
-                    self.setState({ formRErrors: ['error has occured'] });
-                });
+		self.setState({ formRErrors: ['enter secret'] });
         }
     }
     handleChangeAmount(event) {
         this.setState({ [event.target.name]: event.target.value });
     }
     render() {
+console.log(this);
         let {
             formRErrors,
             formEErrors,
