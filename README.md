@@ -80,5 +80,7 @@ restart `ganache-cli` and start again
 start `ganache-cli` with `-l 1000000000`
 
 
+any other weird or not working problems with revert, try a VM on AWS
+
 
 
