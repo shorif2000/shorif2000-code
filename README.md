@@ -15,6 +15,8 @@ PHP 7.0.28-0ubuntu0.16.04.1 (cli) ( NTS )
 
 Ganache CLI v6.0.3
 
+Truffle v3.4.11
+
 
 # setup
 
