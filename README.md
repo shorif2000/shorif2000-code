@@ -17,6 +17,8 @@ Ganache CLI v6.0.3
 
 Truffle v3.4.11
 
+available ports are open
+
 
 # setup
 
