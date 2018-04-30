@@ -21,9 +21,14 @@ class App extends React.Component {
                 watchRegulator: {},
                 tollboothoperator: {},
                 tollbooths: [],
-		exitSecretHashed : ''
+		        exitSecretHashed : '',
+                logRoadExited: [],
+                vehicle_address: ''
             }
             this.handleDisplayPage = this.handleDisplayPage.bind(this);
+            this.loadLogRoadExited = this.loadLogRoadExited.bind(this);
+            this.passVehicleAddressBack = this.passVehicleAddressBack.bind(this);
+            this.passExitBack = this.passExitBack.bind(this);
     }
 
     passDataBack = (data) => {
@@ -67,6 +72,14 @@ class App extends React.Component {
         this.setState({tollboothoperator: data.tollboothoperator});
     }
 
+    passVehicleAddressBack = (vehicle_address) => {
+        this.setState({ vehicle_address });
+    }
+
+    passExitBack = () => {
+        this.loadLogRoadExited();
+    }
+
     componentWillMount() {
         getWeb3
         .then(results => {
@@ -91,6 +104,37 @@ class App extends React.Component {
         this.setState({ showPage: page });
     }
 
+    loadLogRoadExited(){
+        if(this.state.vehicle_address.length > 0){
+            let self = this;
+            this.state.tollboothoperator.tollboothoperator.LogRoadExited({}, { fromBlock: 0, to: 'latest' })
+            .get(function(error, logEvent) {
+                    if (error) {
+                        console.error(error);
+                    } else {
+                        var logRoadExited = [];
+                        Object.keys(logEvent).map(key => {
+                            if (
+                                logEvent[key].args.vehicle ==
+                                self.state.vehicle_address
+                            ) {
+                                return logRoadExited.push({
+                                    exitBooth: logEvent[key].args.exitBooth,
+                                    finalFee: logEvent[
+                                        key
+                                    ].args.finalFee.toNumber(),
+                                    refundWeis: logEvent[key].args.refundWeis
+                                });
+                            }
+                        });
+                        if(self.state.logRoadExited.length != logRoadExited.length){
+                            self.setState({ logRoadExited });
+                        }
+                    }
+            });
+        }
+    }
+
     render() {
         let style1 = 'block';
         let style2 = 'none';
@@ -111,6 +155,7 @@ class App extends React.Component {
             style2 = 'none';
             style3 = 'block';
             style4 = 'none';
+            this.loadLogRoadExited();
         }else if(this.state.showPage == 'page4'){
             style1 = 'none';
             style2 = 'none';
@@ -134,10 +179,10 @@ class App extends React.Component {
                         <TollboothOperator web3={this.state.web3} accounts={this.state.accounts} vehicles={this.state.vehicles} passDataBack={this.passDataBack} passVehiclesBack={this.passVehiclesBack} passTollboothOperatorBack={this.passTollboothOperatorBack} regulator={this.state.regulator.regulator} />
                     </div>
                     <div style={{display: style3}}>
-                        <Vehicles web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} vehicles={this.state.vehicles} regulator={this.state.regulator} tollboothoperator={this.state.tollboothoperator} tollbooths={this.state.tollbooths} passSecretBack={this.passSecretBack} /> 
+                        <Vehicles web3={this.state.web3} accounts={this.state.accounts} passDataBack={this.passDataBack} vehicles={this.state.vehicles} regulator={this.state.regulator} tollboothoperator={this.state.tollboothoperator} tollbooths={this.state.tollbooths} passSecretBack={this.passSecretBack} logRoadExited={this.state.logRoadExited} passVehicleAddressBack={this.passVehicleAddressBack}/> 
                     </div>
                     <div style={{display: style4}}>
-			<Tollbooths web3={this.state.web3} tollboothoperator={this.state.tollboothoperator} tollbooths={this.state.tollbooths} exitSecretHashed={this.state.exitSecretHashed} />
+            			<Tollbooths web3={this.state.web3} tollboothoperator={this.state.tollboothoperator} tollbooths={this.state.tollbooths} exitSecretHashed={this.state.exitSecretHashed} vehicle_address={this.state.vehicle_address} passExitBack={this.passExitBack}/>
                     </div>
                 </div>
             </div>

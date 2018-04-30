@@ -29,6 +29,7 @@ class Vehicles extends Component {
         this.multiplier = '';
         this.vehicleType = '';
         this.loadHistory = this.loadHistory.bind(this);
+        this.passVehicleAddressBack = this.passVehicleAddressBack.bind(this);
     }
     passDataBack() {
         this.props.passDataBack(this.props.accounts);
@@ -46,6 +47,11 @@ class Vehicles extends Component {
             exitSecretHashed : this.logRoadEntered[0].exitSecretHashed
         });
     }
+
+    passVehicleAddressBack(){
+        this.props.passVehicleAddressBack(this.state.vehicle_address);
+    }
+    
 
     instantiateContract = vehicle_address => {
         const regulator = this.props.regulator.regulator;
@@ -81,11 +87,9 @@ class Vehicles extends Component {
                             bal.toNumber(),
                             'ether'
                         );
+
                         tollboothoperator
-                            .LogTollBoothAdded(
-                                {},
-                                { fromBlock: 0, to: 'latest' }
-                            )
+                            .LogTollBoothAdded({},{ fromBlock: 0, to: 'latest' })
                             .get(function(error, logEvent) {
                                 if (error) {
                                     console.log(error);
@@ -105,6 +109,7 @@ class Vehicles extends Component {
                                 }
                             });
                         self.loadHistory();
+                        self.passVehicleAddressBack();
                     })
                     .catch(error => {
                         console.log(error);
@@ -298,6 +303,11 @@ class Vehicles extends Component {
                 {tollbooth_history[key]}
             </option>
         ));
+
+        if(this.props.logRoadExited.length > this.state.logRoadExited.length){
+            this.setState({logRoadExited: this.props.logRoadExited});
+        }
+
         return (
             <div className="container-fluid">
                 <div className="row">
