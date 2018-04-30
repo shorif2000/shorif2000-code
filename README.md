@@ -1,4 +1,4 @@
-#Prerequisites
+# Prerequisites
 
 $ npm -v
 5.6.0
@@ -16,7 +16,7 @@ PHP 7.0.28-0ubuntu0.16.04.1 (cli) ( NTS )
 Ganache CLI v6.0.3
 
 
-#setup
+# setup
 
 * clone to linux machine
 * cd into dir
@@ -65,7 +65,7 @@ truffle test test\<filename>
 ```
 
 
-#troubleshooting
+# troubleshooting
 
 "sender doesn't have enough funds to send tx. The upfront cost is: 3000000 and the sender's account only has: 0"
 
