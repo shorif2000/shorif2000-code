@@ -13,7 +13,8 @@ class Tollbooths extends Component {
             display: 'none',
             secret: '',
             formEErrors: [],
-            logPendingPayment: []
+            logPendingPayment: [],
+	    refund: ''
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -129,8 +130,12 @@ class Tollbooths extends Component {
                     }
                 })*/
                 .then(() => operator.reportExitRoad(secret32, { from: tollbooth_address , gas: 5000000}))
-                .then(() => {
-                    self.props.passExitBack 
+                .then((tx) => {
+		    if(tx.logs[0].event == "LogRoadExited"){
+			self.setState({refund: tx.logs[0].args.refundWeis.toNumber()});
+		    }
+                    self.props.passExitBack();
+		     
                 })
                 .catch(error => {
                     if(typeof(error) === "object"){
@@ -217,11 +222,11 @@ class Tollbooths extends Component {
                     <div>
                     <div>
                     <div className="col-xs-6">
-                    <div className="row">pending payment</div>
+                    <div className="row">refund</div>
                     <div className="row">
                     <pre>
                     {JSON.stringify(
-                            this.state.logPendingPayment,
+                            this.state.refund,
                             null,
                             2
                             )}

@@ -18,7 +18,8 @@ class Vehicles extends Component {
             select_tollbooth: null,
             tollbooth_history: [],
             logRoadEntered: [],
-            logRoadExited: []
+            logRoadExited: [],
+	    totalRefund: 0
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -152,28 +153,34 @@ class Vehicles extends Component {
                     self.setState({ logRoadEntered });
                 }
             });
+
         tollboothoperator
             .LogRoadExited({}, { fromBlock: 0, to: 'latest' })
             .get(function(error, logEvent) {
                 if (error) {
                     console.error(error);
                 } else {
-                    var logRoadExited = [];
+                    var logRoadExitedAll = [];
+		    let logRoadExited = []
                     Object.keys(logEvent).map(key => {
-                        if (
-                            logEvent[key].args.vehicle ==
-                            self.state.vehicle_address
-                        ) {
-                            return logRoadExited.push({
+                            return logRoadExitedAll.push({
                                 exitBooth: logEvent[key].args.exitBooth,
-                                finalFee: logEvent[
-                                    key
-                                ].args.finalFee.toNumber(),
-                                refundWeis: logEvent[key].args.refundWeis
+				exitSecretHashed: logEvent[key].args.exitSecretHashed,
+                                finalFee: logEvent[key].args.finalFee.toNumber(),
+                                refundWeis: logEvent[key].args.refundWeis.toNumber()
                             });
-                        }
                     });
-                    self.setState({ logRoadExited });
+
+		    let totalRefund = 0;
+		    for(let i = 0; i< self.state.logRoadEntered.length;i++){
+			for(let j=0;j<logRoadExitedAll.length;j++){
+			    if(self.state.logRoadEntered[i].exitSecretHashed == logRoadExitedAll[j].exitSecretHashed){
+				logRoadExited.push(logRoadExitedAll[j]);
+				totalRefund += logRoadExitedAll[j].refundWeis
+			    }
+			}
+		    }
+                        self.setState({ logRoadExited , totalRefund});
                 }
             });
     }
@@ -303,7 +310,6 @@ class Vehicles extends Component {
                 {tollbooth_history[key]}
             </option>
         ));
-
         if(this.props.logRoadExited.length > this.state.logRoadExited.length){
             this.setState({logRoadExited: this.props.logRoadExited});
         }
