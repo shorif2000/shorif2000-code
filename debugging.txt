@@ -1,0 +1,120 @@
+exercise 1
+
+- missing pragma 
+- if it is 0.4.6 then `revert()` need to change to `throw` on both lines
+- uint248 is a little old. should be uint or uint256 which is the same thing
+contract PiggyBank {
+    address owner;
+    uint248 balance;
+    bytes32 hashedPassword;
+
+- missing constructor  or incorrectly spelled, needs to match contract name
+- mising log event for function
+- no require in constructor to validate msg.value
+
+    function piggyBank(bytes32 _hashedPassword) {
+        owner = msg.sender;
+        balance += uint248(msg.value);
+        hashedPassword = _hashedPassword;
+    }
+
+- make function public
+- return `true` on payable function when success
+- mising log event for function
+- missing validation - check address are valid and amount is valid
+- this is the old way of doing validation. should be a require now
+    function () payable {
+        if (msg.sender != owner) revert();
+        balance += uint248(msg.value);
+    }
+
+- check sender is owner on kill function
+- send a hashed password to compare not the actual password
+- check validation on address
+- make function public
+    function kill(bytes32 password) {
+        if (keccak256(owner, password) != hashedPassword) revert();
+        selfdestruct(owner);
+    }
+}
+
+
+
+
+
+
+
+
+exercise 2
+
+- old compiler version
+
+pragma solidity ^0.4.5;
+
+- missing constructor
+interface WarehouseI {
+    function setDeliveryAddress(string where);
+    function ship(uint id, address customer) returns (bool handled);
+}
+
+contract Store {
+    address wallet;
+    WarehouseI warehouse;
+
+- check for valid addresses
+    function Store(address _wallet, address _warehouse) {
+        wallet = _wallet;
+        warehouse = WarehouseI(_warehouse);
+    }
+
+- missing payable
+- purchase function can be exploited, attacker can loop and call purchase continuously. it is vulnerable to a re-entry attack and accounting should be updated before a payment is made
+- send can fail, no error checking. missing validation on value and address
+- should keep a balance variable as tally
+- missing logevent
+    function purchase(uint id) returns (bool success) {
+        wallet.send(msg.value);
+        return warehouse.ship(id, msg.sender);
+    }
+}
+
+
+
+exercise 3
+
+pragma solidity ^0.4.9;
+
+- use meaningful variable names... not one and two
+contract Splitter {
+    address one;
+    address two;
+
+- `revert()` should be `throw`
+- should be public functions
+- no validation on address
+    function Splitter(address _two) {
+        if (msg.value > 0) revert();
+        one = msg.sender;
+        two = _two;
+    }
+
+- should be public functions
+- check it is divisible by 3
+- dont send more than 1 payment in function. chnage to use withdraw and send payment 1 at a time.  it is better to implement pull payments from addresses rather than a push to multiple addresses
+- log event in payable
+- do not allow more than 1 state change in function
+- update accounting before making payments to avoid re-entry attacks
+- this is the old way of making a payment.
+
+    function () payable {
+        uint amount = this.balance / 3;
+        require(one.call.value(amount)());
+        require(two.call.value(amount)());
+    }
+}
+
+
+- create 3rd function to store balance between 3 and use payable  function to withdraw per address individually
+- add payable to splitter function
+
+
