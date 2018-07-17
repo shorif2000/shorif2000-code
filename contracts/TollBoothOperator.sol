@@ -161,15 +161,19 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         returns (uint status)
     {
         require(isTollBooth(msg.sender));
+        //require(mHash[hashSecret(exitSecretClear)].exists); //secret does not match a hashed one. 
+        require(mHash[hashSecret(exitSecretClear)].exists);
+        require(!mHash[hashSecret(exitSecretClear)].used);//secret has already been reported on exit.
+        
         address vehicle;
         address entryBooth;
         uint depositedWeis;
         (vehicle, entryBooth, depositedWeis) = getVehicleEntry(hashSecret(exitSecretClear));
+        
         uint vType = Regulated.getRegulator().getVehicleType(vehicle);
         require(vType > 0); // vehicle is no longer a registered vehicle. && vehicle is no longer allowed on this road system.
         require(msg.sender != entryBooth);
-        require(mHash[hashSecret(exitSecretClear)].exists); //secret does not match a hashed one. 
-        require(!mHash[hashSecret(exitSecretClear)].used);//secret has already been reported on exit.
+        
         if(getRoutePrice(entryBooth,msg.sender) == 0){ //if the fee is not known at the time of exit, i.e. if the fee is 0, the pending payment is recorded, and "base route price required" event is emitted and listened to by the operator's oracle.
             mPendingPayments[entryBooth][msg.sender] += 1;
             mSecret[entryBooth][msg.sender][mPendingPayments[entryBooth][msg.sender]].secretHashed = hashSecret(exitSecretClear);
@@ -177,6 +181,7 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
             LogPendingPayment(hashSecret(exitSecretClear), entryBooth, msg.sender);
             return 2;
         }
+        
         uint finalFee =  getRoutePrice(entryBooth,msg.sender) * getMultiplier(vType); 
         mHash[hashSecret(exitSecretClear)].value = 0;
         mHash[hashSecret(exitSecretClear)].used = true;
@@ -297,8 +302,8 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         require(collectedFees > 0);
         uint _collectedFees = collectedFees ;
         collectedFees = 0;
-        getOwner().transfer(_collectedFees);
-        LogFeesCollected(getOwner(),_collectedFees);
+        msg.sender.transfer(_collectedFees);
+        LogFeesCollected(msg.sender,_collectedFees);
         return true;
     }
     
