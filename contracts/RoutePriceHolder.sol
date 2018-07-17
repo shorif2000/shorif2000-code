@@ -7,7 +7,9 @@ contract RoutePriceHolder is TollBoothHolder, RoutePriceHolderI {
     
     mapping (address => mapping ( address => uint ) ) private mRoutePrice;
     
-	function RoutePriceHolder(){
+	function RoutePriceHolder()
+	public
+	{
 	}
 	
 	/**
