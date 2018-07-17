@@ -97,7 +97,7 @@ contract TestRoutePriceHolder {
     function testCanAddAndRemoveManyRoutePrices_TollBoothOperator() public {
         RoutePriceHolderI holder = createInstance(1);
 
-        uint count = 50;
+        uint count = 47; //reduce if running out of gas
 
         for (uint i = 1; i <= count + 1; i++) {
             Assert.isTrue(TollBoothHolderI(holder).addTollBooth(address(i)), "Should have been able to add toll booth");
