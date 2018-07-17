@@ -24,11 +24,7 @@ contract MultiplierHolder is Owned, MultiplierHolderI {
     {
         require(vehicleType != 0);
         require(mMultiplier[vehicleType] != multiplier);
-        if(multiplier == 0){
-            delete mMultiplier[vehicleType];
-        }else{
-            mMultiplier[vehicleType] = multiplier;
-        }
+        mMultiplier[vehicleType] = multiplier;
         LogMultiplierSet(msg.sender,vehicleType,multiplier);
         return true;
     }
