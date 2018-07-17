@@ -25,11 +25,7 @@ contract Regulator is Owned, RegulatorI {
     {
         require(vehicle != 0x0);
         require(mVehicle[vehicle] != vehicleType);
-        if(vehicleType == 0){
-            delete mVehicle[vehicle];
-        }else{
-            mVehicle[vehicle] = vehicleType;
-        }
+        mVehicle[vehicle] = vehicleType;
         LogVehicleTypeSet(msg.sender, vehicle, vehicleType);
         return true;
     }
@@ -77,7 +73,7 @@ contract Regulator is Owned, RegulatorI {
         returns(bool success)
     {
         require(isOperator(operator));
-        delete mTollBoothOperators[operator];
+        mTollBoothOperators[operator] = false;
         LogTollBoothOperatorRemoved(msg.sender,operator);
         return true;
     }
