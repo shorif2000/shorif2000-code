@@ -27,8 +27,8 @@ contract Owned is OwnedI {
     {
         require(currentOwner != newOwner);
         require(newOwner != 0x0);
+        LogOwnerSet(currentOwner, newOwner);
         currentOwner = newOwner;
-        LogOwnerSet(msg.sender, newOwner);
         return true;
     }
 
