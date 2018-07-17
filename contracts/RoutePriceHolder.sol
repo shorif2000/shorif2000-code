@@ -44,13 +44,6 @@ contract RoutePriceHolder is TollBoothHolder, RoutePriceHolderI {
         public
         returns(uint priceWeis)
     {
-        //@todo return 0 on failure
-        //require(entryBooth != 0x0);
-        //require(exitBooth != 0x0);
-        //require(isTollBooth(entryBooth));
-        //require(isTollBooth(exitBooth));
-        //require(entryBooth != exitBooth);
-        
         return mRoutePrice[entryBooth][exitBooth];
     }
 }
