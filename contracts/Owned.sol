@@ -25,11 +25,10 @@ contract Owned is OwnedI {
         fromOwner
         returns(bool success)
     {
-        address owner = getOwner();
-        require(owner != newOwner);
+        require(currentOwner != newOwner);
         require(newOwner != 0x0);
         currentOwner = newOwner;
-        LogOwnerSet(owner,newOwner);
+        LogOwnerSet(currentOwner, newOwner);
         return true;
     }
 
