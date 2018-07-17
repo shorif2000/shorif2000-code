@@ -55,16 +55,15 @@ module.exports = {
             inject: true,
             hash: true // disable caching
         }),
-    /*    new webpack.DefinePlugin({
+        new webpack.DefinePlugin({
             'process.env': {
                 'NODE_ENV': JSON.stringify('production')
             }
-        }),*/
+        }),
         new webpack.optimize.UglifyJsPlugin({
             minimize: true,
             warnings: false,
-            uglifyOptions: { compress: { unused: false } },
-            compress: false
+            uglifyOptions: { compress: { unused: false } }
         }),
         new ExtractTextPlugin("[name].bundle.css")
     ]
