@@ -44,7 +44,7 @@ contract TollBoothHolder is Owned, TollBoothHolderI {
     {
         require(tollBooth != 0x0);
         require(mTollBooth[tollBooth]);
-        delete mTollBooth[tollBooth];
+        mTollBooth[tollBooth] = false;
         LogTollBoothRemoved(msg.sender,tollBooth);
         return true;
     }
