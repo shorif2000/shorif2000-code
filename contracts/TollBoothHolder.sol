@@ -18,8 +18,8 @@ contract TollBoothHolder is Owned, TollBoothHolderI {
         public
         returns(bool success)
     {
-        require(tollBooth != 0x0);
         require(!isTollBooth(tollBooth));
+        require(tollBooth != 0x0);
         mTollBooth[tollBooth] = true;
         LogTollBoothAdded(msg.sender,tollBooth);
         return true;
@@ -42,8 +42,8 @@ contract TollBoothHolder is Owned, TollBoothHolderI {
         public
         returns(bool success)
     {
-        require(tollBooth != 0x0);
         require(mTollBooth[tollBooth]);
+        require(tollBooth != 0x0);
         mTollBooth[tollBooth] = false;
         LogTollBoothRemoved(msg.sender,tollBooth);
         return true;
