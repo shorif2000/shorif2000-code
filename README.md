@@ -8,12 +8,12 @@ webpack -v
 
 
 node -v
-v8.11.1
+v8.11.3
 
 php -v
 PHP 7.0.28-0ubuntu0.16.04.1 (cli) ( NTS )
 
-Ganache CLI v6.0.3
+Ganache CLI v6.1.6
 
 Truffle v3.4.11
 
