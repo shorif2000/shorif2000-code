@@ -22,6 +22,8 @@ available ports are open
 
 # setup
 
+## this is based on using `localhost` if you are using named/ip address then `truffle.js` needs to be updated and you need to specify `-h` flag with ganache-cli
+
 * clone to linux machine
 * cd into dir
 * start ganache
