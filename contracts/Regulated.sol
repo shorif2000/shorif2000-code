@@ -23,11 +23,10 @@ contract Regulated is RegulatedI {
         returns(bool success)
     {
         require(newRegulator == 0x0);
-        require(msg.sender != currentRegulator);
         require(currentRegulator != newRegulator);
         
+        LogRegulatorSet(currentRegulator, newRegulator);
         currentRegulator = newRegulator;
-        LogRegulatorSet(msg.sender, newRegulator);
         
         return true;
     }
