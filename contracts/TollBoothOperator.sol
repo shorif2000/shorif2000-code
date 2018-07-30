@@ -10,8 +10,12 @@ import './interfaces/TollBoothOperatorI.sol';
 contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePriceHolder, Regulated, TollBoothOperatorI {
 	    
 	uint private collectedFees;
+	
 	mapping (address => mapping ( address => uint) ) private mPendingPayments;
 	mapping (address => mapping ( address => uint) ) private mPendingPaymentPointer;
+	mapping ( address => mapping ( address => mapping ( uint => SecretStruct) ) ) private mSecret;
+    mapping ( bytes32 => SecretStruct ) private mHash;
+	
 	struct SecretStruct {
         address entryBooth;
 	    uint vType;
@@ -21,8 +25,6 @@ contract TollBoothOperator is Pausable, DepositHolder, MultiplierHolder, RoutePr
         bool exists;
         bytes32 secretHashed; 
 	}
-	mapping ( address => mapping ( address => mapping ( uint => SecretStruct) ) ) private mSecret;
-    mapping ( bytes32 => SecretStruct ) private mHash;
 	
 	event LogRoadEntered(
         address indexed vehicle,
