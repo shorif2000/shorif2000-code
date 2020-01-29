@@ -1,4 +1,7 @@
-# Prerequisites
+#Smart Contract
+
+
+## Prerequisites
 
 $ npm -v
 5.6.0
@@ -20,9 +23,9 @@ Truffle v3.4.11
 available ports are open
 
 
-# setup
+## setup
 
-## this is based on using `localhost` if you are using named/ip address then `truffle.js` needs to be updated and you need to specify `-h` flag with ganache-cli
+### this is based on using `localhost` if you are using named/ip address then `truffle.js` needs to be updated and you need to specify `-h` flag with ganache-cli
 
 * clone to linux machine
 * cd into dir
@@ -57,7 +60,7 @@ npm i
 php -S 0.0.0.0:8000 -t /home/ubuntu/shorif2000-code/build/
 ```
 
-# tests
+## tests
 
 * cd to dir and run
 ```sh
@@ -71,7 +74,7 @@ truffle test test\<filename>
 ```
 
 
-# troubleshooting
+## troubleshooting
 
 "sender doesn't have enough funds to send tx. The upfront cost is: 3000000 and the sender's account only has: 0"
 
